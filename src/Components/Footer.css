@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+.footer-container {
+  background-color: #121212;
+  color: #ffffff;
+  padding: 80px 40px 30px;
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: center;
+  gap: 120px;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 50px;
+}
+
+.footer-brand-section {
+  flex: 0 0 320px;
+  margin-bottom: 30px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.footer-logo-img {
+  height: 48px;
+  width: auto;
+  /* Since the background is dark and the logo is 'black', we invert it to be white */
+  filter: invert(1) brightness(2);
+}
+
+.footer-description {
+  color: #dddddd;
+  font-size: 14px;
+  line-height: 1.8;
+  margin: 0;
+  font-weight: 400;
+}
+
+.footer-links-container {
+  display: flex;
+  gap: 100px;
+  flex-wrap: wrap;
+  margin-right: auto;
+}
+
+.footer-column h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 12px;
+}
+
+.footer-column ul li a {
+  color: #a0a0a0;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+  transition: color 0.2s ease, transform 0.2s ease;
+  display: inline-block;
+}
+
+.footer-column ul li a:hover {
+  color: #ffffff;
+}
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 40px;
+  position: relative;
+  flex-wrap: wrap;
+}
+
+.footer-copyright {
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 20px;
+  position: absolute;
+  right: 0;
+}
+
+.social-icon {
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+.social-icon:hover {
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    gap: 50px;
+    justify-content: flex-start;
+  }
+
+  .footer-links-container {
+    gap: 40px;
+    width: 100%;
+    margin-right: 0;
+    justify-content: space-between;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .footer-socials {
+    position: static;
+    justify-content: center;
+  }
+}

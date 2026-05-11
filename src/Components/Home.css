@@ -1,0 +1,207 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+/* ── RESET & BASE ─────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.page {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #ffffff;
+  overflow-x: hidden;
+}
+
+/* ── HERO SECTION ─────────────────────────────────────── */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 460px;
+  padding: 60px 80px 60px 180px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.hero__content {
+  flex: 0 0 auto;
+  max-width: 380px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero__title {
+ font-weight: 600; /* or 600 for slightly lighter */
+  font-size: 40px;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  color: #111;
+
+}
+
+/* ── GREY SPACER DIV ──────────────────────────────────── */
+/* Same background as hero. Cards overlap up into this.   */
+.spacer {
+  background-color:#dcdcdc;
+  height: 80px;              /* controls how much grey shows above the cards */
+  position: relative;
+  z-index: 1;
+}
+
+/* ── GRID WRAPPER ─────────────────────────────────────── */
+.grid-wrapper {
+  position: relative;
+  z-index: 10;
+  padding: 0 80px 60px 80px;
+  margin-top: -80px;         /* pulls cards up fully into the grey spacer */
+}
+
+/* ── BOTTOM GRID ──────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 380px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+}
+
+/* ── SHARED CARD STYLES ───────────────────────────────── */
+.card {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 48px 20px 48px 20px; /* 🔥 reduce left space */
+  position: relative;
+  overflow: hidden;
+  min-height: 380px;
+}
+
+.card__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.card__content {
+  padding-left: 20px;
+  position: relative;
+  z-index: 2;
+  align-self: flex-start;
+  flex: 0 0 auto;
+  max-width: 280px;
+}
+
+/* ── LEFT CARD ────────────────────────────────────────── */
+.card--blue .card__title {
+  font-family: 'Montserrat', sans-serif;;
+  font-weight: 700;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.05;
+  color: #ffffff;
+  margin-bottom: 14px;
+}
+
+.card--blue .card__subtitle {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 28px;
+}
+
+/* ── RIGHT CARD ───────────────────────────────────────── */
+.card--yellow .card__title {
+  font-family: 'Montserrat', sans-serif;;
+  font-weight: 700;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.05;
+  color: #111111;
+  margin-bottom: 14px;
+}
+
+.card--yellow .card__subtitle {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 28px;
+}
+
+/* ── BUTTONS ──────────────────────────────────────────── */
+.btn {
+  display: inline-block;
+  background-color: #111111;
+  color: #ffffff;
+  font-family: 'Barlow', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 15px 32px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+  background-color: #333333;
+}
+
+/* ── RESPONSIVE ───────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero {
+    padding: 48px 40px 60px 40px;
+  }
+
+  .spacer {
+    height: 60px;
+  }
+
+  .grid-wrapper {
+    padding: 0 24px 40px 24px;
+    margin-top: -60px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 40px 24px 60px 24px;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .spacer {
+    height: 50px;
+  }
+
+  .grid-wrapper {
+    padding: 0 16px 32px 16px;
+    margin-top: -50px;
+  }
+
+  .card {
+    padding: 36px 32px;
+    justify-content: center;
+    text-align: center;
+  }
+}

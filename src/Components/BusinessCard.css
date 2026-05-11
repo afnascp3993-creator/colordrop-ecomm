@@ -1,0 +1,249 @@
+.marketing-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+/* BANNER */
+.marketing-banner {
+  background-color: #e5e5e5;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 60px 80px;
+  margin-bottom: 50px;
+  position: relative;
+  overflow: hidden;
+  height: 320px; /* fixed height to ensure image fits nicely */
+}
+
+.banner-content {
+  z-index: 2;
+  text-align: left;
+}
+
+.banner-content h1 {
+  font-size: 42px;
+  font-weight: 300;
+  color: #1a1a1a;
+  line-height: 1.2;
+  margin-bottom: 30px;
+}
+
+.banner-content h1 strong {
+  font-weight: 700;
+  display: block;
+  margin-top: 5px;
+}
+
+.view-product-btn {
+  background-color: #111;
+  color: #fff;
+  border: none;
+  padding: 14px 28px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.view-product-btn:hover {
+  background-color: #333;
+}
+
+.banner-image {
+  position: absolute;
+  right: -50px;
+  top: -60px;
+  width: 60%;
+  height: 140%;
+  z-index: 1;
+}
+
+.banner-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* GRID */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+@media (max-width: 992px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .marketing-banner {
+    padding: 40px 30px;
+    height: 250px;
+  }
+  .banner-content h1 {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* CARD */
+.card {
+  font-family: 'Nunito', sans-serif;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: transparent;
+  transition: transform 0.3s ease;
+  border: none;
+  box-shadow: none;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.image-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* 1:1 Aspect ratio */
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  background-color: transparent;
+}
+
+.image-wrapper img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .image-wrapper img {
+  transform: scale(1.08);
+}
+
+/* ADD TO CART BUTTON */
+.add-cart-btn-visible {
+  margin-top: 20px;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 40px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  transition: background-color 0.3s ease;
+}
+
+.add-cart-btn-visible:hover {
+  background-color: #3fbaea; /* bright blue on hover to complement the price */
+  color: #ffffff;
+}
+
+/* CONTENT */
+.card-content {
+  display: block;
+  text-align: left;
+  padding: 12px 0 0;
+  width: 100%;
+}
+
+.card-brand {
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  margin: 0 0 4px 0;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-direction: row;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.card-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.price {
+  font-size: 22px;
+  font-weight: 700;
+  color: #3fbaea; /* bright light blue */
+}
+
+.card-pricing {
+  margin-top: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.price-bold {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.price-unit {
+  font-size: 14px;
+  font-weight: 400;
+  color: #555;
+}
+
+.desc {
+  font-size: 14px;
+  font-weight: 500;
+  color: #888;
+  margin: 0;
+}
+
+/* PAGINATION */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 40px;
+}
+
+.pagination span {
+  font-size: 16px;
+  font-weight: 600;
+  color: #b0b0b0;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.pagination span:hover,
+.pagination span.active {
+  color: #222;
+}

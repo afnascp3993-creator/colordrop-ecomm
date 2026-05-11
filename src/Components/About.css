@@ -1,0 +1,262 @@
+.about-container {
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: #333;
+  line-height: 1.6;
+  background-color: #fafafa;
+}
+
+/* Typography Utilities */
+.about-section-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #3fbaea; /* brand blue */
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.about-section-title::before {
+  content: "";
+  display: inline-block;
+  width: 40px;
+  height: 2px;
+  background-color: #3fbaea;
+}
+
+/* HERO SECTION */
+.about-hero {
+  background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+  padding: 100px 5%;
+  text-align: center;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.about-hero h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 800;
+  color: #111;
+  max-width: 900px;
+  margin: 0 auto 30px auto;
+  line-height: 1.2;
+}
+
+.about-hero p {
+  font-size: 18px;
+  color: #555;
+  max-width: 700px;
+  margin: 0 auto 20px auto;
+}
+
+/* OUR STORY */
+.about-story {
+  padding: 100px 5%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 60px;
+}
+
+.story-text p {
+  font-size: 17px;
+  margin-bottom: 25px;
+  color: #555;
+}
+
+.story-text strong {
+  color: #111;
+}
+
+.highlight-quote {
+  font-size: 22px;
+  font-weight: 600;
+  color: #111;
+  border-left: 4px solid #3fbaea;
+  padding-left: 20px;
+  margin: 30px 0;
+  font-style: italic;
+}
+
+/* WHAT WE DO */
+.about-services {
+  background-color: #ffffff;
+  padding: 100px 5%;
+}
+
+.services-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-top: 50px;
+}
+
+.service-card {
+  background: #fafafa;
+  padding: 40px 30px;
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.service-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+  background: #fff;
+}
+
+.service-card h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 15px;
+}
+
+.service-card p {
+  font-size: 15px;
+  color: #666;
+}
+
+/* OUR PHILOSOPHY */
+.about-philosophy {
+  background-color: #111;
+  color: #fff;
+  padding: 100px 5%;
+}
+
+.philosophy-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.philosophy-wrapper .about-section-title {
+  color: #fff;
+}
+
+.philosophy-wrapper .about-section-title::before {
+  background-color: #fff;
+}
+
+.philosophy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin-top: 50px;
+}
+
+.philosophy-item h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #3fbaea;
+}
+
+.philosophy-item p {
+  font-size: 16px;
+  color: #bbb;
+}
+
+/* WHY CHOOSE & IMPACT (Split Section) */
+.about-split-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 1200px;
+  margin: 100px auto;
+  gap: 60px;
+  padding: 0 5%;
+}
+
+.choose-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 30px;
+}
+
+.choose-list li {
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #444;
+}
+
+.choose-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #3fbaea;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.impact-content p {
+  font-size: 17px;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+/* VISION & CLOSING */
+.about-vision-closing {
+  background: linear-gradient(135deg, #3fbaea 0%, #2b82a5 100%);
+  color: #fff;
+  padding: 100px 5%;
+  text-align: center;
+}
+
+.about-vision-closing h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.about-vision-closing p {
+  font-size: 20px;
+  max-width: 800px;
+  margin: 0 auto 40px auto;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+.closing-statement {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.closing-statement h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .about-story, .about-split-section {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-hero, .about-story, .about-services, .about-philosophy, .about-vision-closing {
+    padding: 60px 5%;
+  }
+}

@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PrintCraft Studio</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* Apple-inspired light palette */
+    --bg: #f2f2f7;
+    --surface: rgba(255,255,255,0.85);
+    --surface-solid: #ffffff;
+    --surface2: rgba(255,255,255,0.6);
+    --surface3: rgba(118,118,128,0.12);
+    --surface4: rgba(118,118,128,0.08);
+    --border: rgba(60,60,67,0.13);
+    --border2: rgba(60,60,67,0.08);
+
+    /* iOS Blue system accent */
+    --accent: #007AFF;
+    --accent-hover: #0062CC;
+    --accent-light: rgba(0,122,255,0.12);
+    --accent2: #FF2D55;
+    --accent3: #34C759;
+    --accent-orange: #FF9500;
+    --accent-purple: #AF52DE;
+
+    --text: #1c1c1e;
+    --text2: #3c3c43;
+    --text3: rgba(60,60,67,0.6);
+    --text4: rgba(60,60,67,0.3);
+
+    --canvas-bg: #e5e5ea;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --sidebar-w: 64px;
+    --panel-w: 232px;
+    --toolbar-h: 52px;
+
+    /* Blur */
+    --blur: blur(20px) saturate(1.8);
+    --blur-sm: blur(12px) saturate(1.5);
+  }
+
+  html, body, #root { height: 100%; width: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── LAYOUT ─────────────────────────────────────────────────────────────── */
+  .app { display: flex; flex-direction: column; height: 100vh; }
+
+  .topbar {
+    height: var(--toolbar-h);
+    background: var(--surface);
+    -webkit-backdrop-filter: var(--blur);
+    backdrop-filter: var(--blur);
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 0 14px;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  .main { display: flex; flex: 1; overflow: hidden; }
+
+  .icon-bar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    -webkit-backdrop-filter: var(--blur-sm);
+    backdrop-filter: var(--blur-sm);
+    border-right: 0.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0 10px;
+    gap: 2px;
+    z-index: 90;
+  }
+
+  .panel {
+    width: var(--panel-w);
+    background: var(--surface);
+    -webkit-backdrop-filter: var(--blur-sm);
+    backdrop-filter: var(--blur-sm);
+    border-right: 0.5px solid var(--border);
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .canvas-wrap {
+    flex: 1;
+    background: var(--canvas-bg);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(0,122,255,0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(175,82,222,0.04) 0%, transparent 50%);
+  }
+  .canvas-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+  .canvas-wrap::-webkit-scrollbar-track { background: transparent; }
+  .canvas-wrap::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 3px; }
+
+  .props-panel {
+    width: 220px;
+    background: var(--surface);
+    -webkit-backdrop-filter: var(--blur-sm);
+    backdrop-filter: var(--blur-sm);
+    border-left: 0.5px solid var(--border);
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  /* ── ICON BAR ────────────────────────────────────────────────────────────── */
+  .icon-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: all .18s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .icon-btn:hover { background: var(--surface3); color: var(--text2); transform: scale(1.04); }
+  .icon-btn:active { transform: scale(0.94); }
+  .icon-btn.active {
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+  .icon-btn svg { width: 20px; height: 20px; transition: transform .18s cubic-bezier(0.34,1.56,0.64,1); }
+  .icon-btn.active svg { transform: scale(1.08); }
+
+  /* ── TOPBAR CONTROLS ─────────────────────────────────────────────────────── */
+  .tb-sep { width: 0.5px; height: 24px; background: var(--border); margin: 0 5px; }
+
+  .tb-btn {
+    height: 30px;
+    min-width: 30px;
+    border-radius: 8px;
+    border: 0.5px solid var(--border);
+    background: var(--surface2);
+    -webkit-backdrop-filter: var(--blur-sm);
+    backdrop-filter: var(--blur-sm);
+    color: var(--text2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 10px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    transition: all .15s;
+    letter-spacing: -0.01em;
+  }
+  .tb-btn:hover { background: var(--surface-solid); color: var(--text); border-color: rgba(60,60,67,0.2); box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+  .tb-btn:active { transform: scale(0.96); }
+  .tb-btn:disabled { opacity: .3; cursor: default; transform: none; }
+  .tb-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,122,255,0.3); }
+  .tb-btn.active:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .tb-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+  .logo {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    margin-right: 10px;
+    white-space: nowrap;
+  }
+  .logo span { color: var(--accent); }
+
+  .zoom-display {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text3);
+    min-width: 40px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .spacer { flex: 1; }
+
+  .export-btn {
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: #fff !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,122,255,0.35);
+  }
+  .export-btn:hover { background: var(--accent-hover) !important; box-shadow: 0 4px 12px rgba(0,122,255,0.4) !important; }
+
+  /* ── PANEL SECTIONS ──────────────────────────────────────────────────────── */
+  .panel-section { padding: 14px 12px; border-bottom: 0.5px solid var(--border2); }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text4);
+    margin-bottom: 10px;
+  }
+
+  .panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .panel-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+
+  /* ── TEMPLATE CARDS ──────────────────────────────────────────────────────── */
+  .tmpl-card {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all .2s cubic-bezier(0.34,1.56,0.64,1);
+    background: var(--surface3);
+    aspect-ratio: 1/.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 10px;
+    color: var(--text3);
+  }
+  .tmpl-card:hover { border-color: var(--accent); transform: scale(1.03); box-shadow: 0 4px 16px rgba(0,122,255,0.15); }
+  .tmpl-card:active { transform: scale(0.97); }
+  .tmpl-thumb { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+
+  /* ── CLIPART GRID ────────────────────────────────────────────────────────── */
+  .clipart-item {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    background: var(--surface3);
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .18s cubic-bezier(0.34,1.56,0.64,1);
+    font-size: 22px;
+  }
+  .clipart-item:hover { border-color: var(--accent); background: var(--accent-light); transform: scale(1.08); }
+  .clipart-item:active { transform: scale(0.9); }
+
+  /* ── FONT LIST ───────────────────────────────────────────────────────────── */
+  .font-item {
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 13px;
+    transition: all .12s;
+    border: 1px solid transparent;
+  }
+  .font-item:hover { background: var(--surface3); color: var(--text); }
+  .font-item.active { background: var(--accent-light); border-color: rgba(0,122,255,0.2); color: var(--accent); font-weight: 500; }
+
+  /* ── PROPS PANEL INPUTS ──────────────────────────────────────────────────── */
+  .prop-row { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .prop-label { font-size: 11px; font-weight: 500; color: var(--text3); min-width: 52px; }
+
+  .prop-input {
+    flex: 1;
+    height: 28px;
+    background: var(--surface3);
+    border: 0.5px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    padding: 0 8px;
+    outline: none;
+    transition: all .15s;
+    -webkit-font-smoothing: antialiased;
+  }
+  .prop-input:focus { border-color: var(--accent); background: var(--surface-solid); box-shadow: 0 0 0 3px rgba(0,122,255,0.12); }
+  .prop-input[type=color] { padding: 2px 3px; cursor: pointer; border-radius: 8px; }
+  .prop-input[type=range] { padding: 0; cursor: pointer; accent-color: var(--accent); height: 4px; }
+  .prop-input[type=number] { font-variant-numeric: tabular-nums; }
+
+  .prop-select {
+    flex: 1;
+    height: 28px;
+    background: var(--surface3);
+    border: 0.5px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    padding: 0 8px;
+    outline: none;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .prop-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,122,255,0.12); }
+
+  /* ── ALIGN BUTTONS (iOS segmented feel) ──────────────────────────────────── */
+  .align-group { display: flex; gap: 2px; flex-wrap: wrap; }
+  .align-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    border: 0.5px solid var(--border);
+    background: var(--surface3);
+    color: var(--text3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+  }
+  .align-btn:hover { background: var(--accent-light); color: var(--accent); border-color: rgba(0,122,255,0.2); }
+  .align-btn:active { transform: scale(0.9); }
+  .align-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .align-btn svg { width: 13px; height: 13px; }
+
+  /* ── CANVAS STAGE ────────────────────────────────────────────────────────── */
+  .canvas-stage {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,.04),
+      0 8px 24px rgba(0,0,0,.08),
+      0 24px 64px rgba(0,0,0,.10),
+      0 0 0 0.5px rgba(0,0,0,.06);
+  }
+  canvas { display: block; }
+
+  /* ── LAYER LIST ──────────────────────────────────────────────────────────── */
+  .layer-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all .15s;
+    border: 1px solid transparent;
+    margin: 1px 0;
+  }
+  .layer-item:hover { background: var(--surface3); }
+  .layer-item.selected { background: var(--accent-light); border-color: rgba(0,122,255,0.18); }
+  .layer-item-name { font-size: 11px; font-weight: 500; color: var(--text2); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .layer-item-type { font-size: 9px; font-weight: 600; color: var(--text4); background: var(--surface3); padding: 1px 5px; border-radius: 4px; letter-spacing: 0.03em; text-transform: uppercase; }
+  .layer-item.selected .layer-item-name { color: var(--accent); }
+
+  /* ── SCROLLBARS ──────────────────────────────────────────────────────────── */
+  .panel::-webkit-scrollbar, .props-panel::-webkit-scrollbar { width: 3px; }
+  .panel::-webkit-scrollbar-track, .props-panel::-webkit-scrollbar-track { background: transparent; }
+  .panel::-webkit-scrollbar-thumb, .props-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,.12); border-radius: 2px; }
+
+  /* ── UPLOAD ZONE ─────────────────────────────────────────────────────────── */
+  .upload-zone {
+    border: 1.5px dashed rgba(0,122,255,0.3);
+    border-radius: var(--radius);
+    padding: 22px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .18s;
+    color: var(--text3);
+    font-size: 12px;
+    font-weight: 500;
+    background: rgba(0,122,255,0.03);
+  }
+  .upload-zone:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .upload-zone svg { width: 26px; height: 26px; margin-bottom: 8px; color: var(--accent); opacity: .7; }
+
+  /* ── SHAPE GRID ──────────────────────────────────────────────────────────── */
+  .shape-btn {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    background: var(--surface3);
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .18s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .shape-btn:hover { border-color: var(--accent); background: var(--accent-light); transform: scale(1.06); }
+  .shape-btn:active { transform: scale(0.93); }
+  .shape-btn svg { width: 24px; height: 24px; fill: var(--text3); transition: fill .15s; }
+  .shape-btn:hover svg { fill: var(--accent); }
+
+  /* ── STATUS BAR ──────────────────────────────────────────────────────────── */
+  .statusbar {
+    height: 22px;
+    background: var(--surface);
+    -webkit-backdrop-filter: var(--blur-sm);
+    backdrop-filter: var(--blur-sm);
+    border-top: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--text4);
+    flex-shrink: 0;
+  }
+
+  /* ── TABS (iOS segmented control style) ─────────────────────────────────── */
+  .tab-row {
+    display: flex;
+    margin: 10px 10px 0;
+    background: var(--surface3);
+    border-radius: 9px;
+    padding: 2px;
+    gap: 0;
+    margin-bottom: 4px;
+  }
+  .tab {
+    flex: 1;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--text3);
+    font-size: 11px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .2s cubic-bezier(0.34,1.56,0.64,1);
+    border-radius: 7px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .tab:hover { color: var(--text2); }
+  .tab.active { background: var(--surface-solid); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.10), 0 0 0 0.5px rgba(0,0,0,.04); }
+
+  /* ── TOAST ───────────────────────────────────────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 44px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(28,28,30,0.9);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    z-index: 9999;
+    pointer-events: none;
+    animation: toastIn .25s cubic-bezier(0.34,1.56,0.64,1);
+    letter-spacing: -0.01em;
+  }
+  @keyframes toastIn {
+    from { opacity:0; transform: translateX(-50%) translateY(12px) scale(0.92); }
+    to   { opacity:1; transform: translateX(-50%) translateY(0) scale(1); }
+  }
+
+  /* ── SCROLL SECTION ──────────────────────────────────────────────────────── */
+  .scroll-section { max-height: 280px; overflow-y: auto; }
+  .scroll-section::-webkit-scrollbar { width: 3px; }
+  .scroll-section::-webkit-scrollbar-thumb { background: rgba(0,0,0,.1); border-radius: 2px; }
+
+  input[type=file] { display: none; }
+
+  /* ── 3D PREVIEW PANEL ────────────────────────────────────────────────────── */
+  .preview3d-panel {
+    position: absolute;
+    width: 320px;
+    background: rgba(255,255,255,0.82);
+    -webkit-backdrop-filter: blur(32px) saturate(1.8);
+    backdrop-filter: blur(32px) saturate(1.8);
+    border: 0.5px solid rgba(255,255,255,0.9);
+    border-radius: 18px;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,.04),
+      0 8px 24px rgba(0,0,0,.08),
+      0 32px 64px rgba(0,0,0,.12);
+    overflow: hidden;
+    z-index: 200;
+    user-select: none;
+    transition: box-shadow .25s, transform .25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .preview3d-panel:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.10), 0 40px 80px rgba(0,0,0,.14);
+  }
+  .preview3d-header {
+    height: 38px;
+    background: rgba(255,255,255,0.7);
+    border-bottom: 0.5px solid rgba(0,0,0,.06);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+    cursor: grab;
+    flex-shrink: 0;
+  }
+  .preview3d-header:active { cursor: grabbing; }
+  .preview3d-title { font-size: 12px; font-weight: 600; color: var(--text2); flex: 1; letter-spacing: -0.01em; }
+  .preview3d-dots { display: flex; gap: 6px; }
+  .preview3d-dot { width: 12px; height: 12px; border-radius: 50%; cursor: default; transition: filter .15s; }
+  .preview3d-dot:hover { filter: brightness(0.85); }
+  .preview3d-body { position: relative; }
+  .preview3d-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 10px;
+    background: rgba(255,255,255,0.6);
+    border-top: 0.5px solid rgba(0,0,0,.06);
+  }
+  .preview3d-ctrl-btn {
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 7px;
+    border: 0.5px solid var(--border);
+    background: rgba(255,255,255,0.8);
+    color: var(--text2);
+    font-size: 11px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .15s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+    -webkit-font-smoothing: antialiased;
+  }
+  .preview3d-ctrl-btn:hover { background: var(--accent-light); color: var(--accent); border-color: rgba(0,122,255,.2); transform: scale(1.03); }
+  .preview3d-ctrl-btn:active { transform: scale(0.95); }
+  .preview3d-ctrl-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 6px rgba(0,122,255,0.3); }
+  .preview3d-shape-row { display: flex; gap: 4px; }
+  .preview3d-spacer { flex:1; }
+  .preview3d-badge { font-size: 10px; color: var(--text4); letter-spacing: .01em; }
+
+  /* ── DROPDOWN ────────────────────────────────────────────────────────────── */
+  .dropdown { position: relative; }
+  .dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: rgba(255,255,255,0.92);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    backdrop-filter: blur(24px) saturate(1.8);
+    border: 0.5px solid rgba(0,0,0,.08);
+    border-radius: 14px;
+    padding: 5px;
+    z-index: 300;
+    min-width: 160px;
+    box-shadow: 0 4px 8px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.12), 0 32px 64px rgba(0,0,0,.08);
+    animation: menuIn .18s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes menuIn {
+    from { opacity:0; transform: translateY(-8px) scale(0.95); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+  }
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 9px;
+    transition: background .1s;
+    -webkit-font-smoothing: antialiased;
+  }
+  .dropdown-item:hover { background: var(--surface3); }
+  .dropdown-item:active { background: var(--accent-light); color: var(--accent); }
+
+  /* ── TOGGLE SWITCH ───────────────────────────────────────────────────────── */
+  .ios-toggle {
+    position: relative;
+    width: 36px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+  .ios-toggle input { opacity:0; width:0; height:0; position:absolute; }
+  .ios-toggle-track {
+    position: absolute;
+    inset: 0;
+    border-radius: 11px;
+    background: rgba(120,120,128,0.2);
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .ios-toggle input:checked + .ios-toggle-track { background: var(--accent); }
+  .ios-toggle-thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    transition: transform .2s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+  }
+  .ios-toggle input:checked ~ .ios-toggle-thumb { transform: translateX(14px); }
+
+  /* ── PILL BADGE ──────────────────────────────────────────────────────────── */
+  .pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── SECTION HEADER ──────────────────────────────────────────────────────── */
+  .section-header {
+    padding: 12px 12px 2px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.4px;
+  }
+
+  /* ── ADD BUTTON ──────────────────────────────────────────────────────────── */
+  .add-text-btn {
+    width: 100%;
+    padding: 0 12px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: var(--surface3);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .15s cubic-bezier(0.34,1.56,0.64,1);
+    -webkit-font-smoothing: antialiased;
+  }
+  .add-text-btn:hover { background: var(--accent-light); color: var(--accent); transform: scale(1.01); }
+  .add-text-btn:active { transform: scale(0.97); }
+  .add-text-btn-icon {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: var(--surface-solid);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    flex-shrink: 0;
+  }
+  .add-text-btn:hover .add-text-btn-icon { background: var(--accent); color: white; }
+
+  /* ── FONT SIZE PILLS ─────────────────────────────────────────────────────── */
+  .size-pill {
+    padding: 3px 0;
+    border-radius: 6px;
+    border: 0.5px solid var(--border);
+    background: var(--surface3);
+    color: var(--text2);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .size-pill:hover { background: var(--accent-light); color: var(--accent); border-color: rgba(0,122,255,0.2); }
+  .size-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect, useCallback } = React;
+
+// ─── ICONS ────────────────────────────────────────────────────────────────────
+const Icon = ({ d, size=16 }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:size,height:size}}>
+    <path d={d}/>
+  </svg>
+);
+const icons = {
+  text: "M4 6h16M4 12h10M4 18h7M20 12l-4 8M20 12l4 8",
+  image: "M21 15l-5-5L5 20M3 3h18v18H3zM8.5 10a1.5 1.5 0 100-3 1.5 1.5 0 000 3z",
+  template: "M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z",
+  clipart: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+  shape: "M12 2L2 19h20L12 2zM12 9v4M12 16h.01",
+  undo: "M9 14L4 9l5-5M4 9h12a5 5 0 010 10H4",
+  redo: "M15 14l5-5-5-5M19 9H7a5 5 0 000 10h12",
+  zoomIn: "M11 3a8 8 0 100 16A8 8 0 0011 3zM21 21l-4.35-4.35M11 8v6M8 11h6",
+  zoomOut: "M11 3a8 8 0 100 16A8 8 0 0011 3zM21 21l-4.35-4.35M8 11h6",
+  delete: "M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6",
+  bold: "M6 4h8a4 4 0 010 8H6zM6 12h9a4 4 0 010 8H6z",
+  italic: "M19 4h-9M14 20H5M15 4L9 20",
+  underline: "M6 3v7a6 6 0 0012 0V3M4 21h16",
+  alignL: "M3 6h18M3 12h12M3 18h15",
+  alignC: "M3 6h18M6 12h12M4 18h16",
+  alignR: "M3 6h18M9 12h12M7 18h14",
+  alignT: "M3 3h18M12 3v18M5 9l7-6 7 6",
+  copy: "M8 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2M8 4v2h8V4M8 4a2 2 0 012-2h4a2 2 0 012 2",
+  layer: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",
+  up: "M18 15l-6-6-6 6",
+  down: "M6 9l6 6 6-6",
+  lock: "M5 11V7a7 7 0 0114 0v4M3 11h18v10H3z",
+  export: "M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 3v12",
+  close: "M18 6L6 18M6 6l12 12",
+  settings: "M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z",
+  plus: "M12 5v14M5 12h14",
+  grid: "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z",
+};
+
+const FONTS = ['DM Sans','Georgia','Times New Roman','Arial','Courier New','Impact','Trebuchet MS','Verdana','Palatino'];
+const FONT_SIZES = [8,10,12,14,16,18,20,24,28,32,36,48,64,72,96];
+
+const TEMPLATES = [
+  { id: 't1', name: 'Business Card', w: 350, h: 200, bg: '#1a1a2e', objects: [
+    { type:'rect', left:0, top:0, width:350, height:200, fill:'#1a1a2e', selectable:false },
+    { type:'rect', left:0, top:160, width:350, height:40, fill:'#6c63ff', selectable:false },
+    { type:'text', text:'YOUR NAME', left:24, top:36, fontSize:22, fontWeight:'bold', fill:'#ffffff', fontFamily:'DM Sans' },
+    { type:'text', text:'Job Title · Company', left:24, top:68, fontSize:11, fill:'#9898a8', fontFamily:'DM Sans' },
+    { type:'text', text:'email@company.com', left:24, top:170, fontSize:10, fill:'#ffffff', fontFamily:'DM Sans' },
+    { type:'text', text:'+1 234 567 8900', left:220, top:170, fontSize:10, fill:'#ffffff', fontFamily:'DM Sans' },
+  ]},
+  { id: 't2', name: 'Flyer', w: 300, h: 420, bg: '#ff6584', objects: [
+    { type:'rect', left:0, top:0, width:300, height:420, fill:'#0f0f1a', selectable:false },
+    { type:'rect', left:0, top:0, width:300, height:160, fill:'#6c63ff', selectable:false },
+    { type:'text', text:'GRAND', left:30, top:30, fontSize:48, fontWeight:'bold', fill:'#ffffff', fontFamily:'DM Sans' },
+    { type:'text', text:'OPENING', left:30, top:85, fontSize:36, fontWeight:'bold', fill:'#ff6584', fontFamily:'DM Sans' },
+    { type:'text', text:'Join us for a spectacular event', left:20, top:180, fontSize:13, fill:'#9898a8', fontFamily:'DM Sans' },
+    { type:'text', text:'DATE: December 25, 2025', left:20, top:220, fontSize:12, fill:'#ffffff', fontFamily:'DM Sans' },
+    { type:'text', text:'VENUE: Grand Hall, City Center', left:20, top:246, fontSize:12, fill:'#ffffff', fontFamily:'DM Sans' },
+    { type:'text', text:'RSVP: events@company.com', left:20, top:280, fontSize:11, fill:'#6c63ff', fontFamily:'DM Sans' },
+  ]},
+  { id: 't3', name: 'Banner', w: 500, h: 180, bg: '#43e97b', objects: [
+    { type:'rect', left:0, top:0, width:500, height:180, fill:'#0f0f11', selectable:false },
+    { type:'rect', left:0, top:0, width:8, height:180, fill:'#43e97b', selectable:false },
+    { type:'text', text:'SUMMER SALE', left:40, top:40, fontSize:42, fontWeight:'bold', fill:'#ffffff', fontFamily:'DM Sans' },
+    { type:'text', text:'UP TO 50% OFF · SHOP NOW', left:40, top:100, fontSize:14, fill:'#43e97b', fontFamily:'DM Sans' },
+    { type:'text', text:'→', left:440, top:65, fontSize:42, fill:'#ffffff', fontFamily:'DM Sans' },
+  ]},
+  { id: 't4', name: 'Certificate', w: 480, h: 340, bg: '#fff', objects: [
+    { type:'rect', left:0, top:0, width:480, height:340, fill:'#fffff8', selectable:false },
+    { type:'rect', left:8, top:8, width:464, height:324, fill:'transparent', stroke:'#c9a84c', strokeWidth:3, selectable:false },
+    { type:'rect', left:14, top:14, width:452, height:312, fill:'transparent', stroke:'#c9a84c', strokeWidth:1, selectable:false },
+    { type:'text', text:'CERTIFICATE', left:140, top:50, fontSize:32, fontWeight:'bold', fill:'#1a1a1a', fontFamily:'Georgia' },
+    { type:'text', text:'OF ACHIEVEMENT', left:160, top:92, fontSize:14, fill:'#c9a84c', fontFamily:'Georgia' },
+    { type:'text', text:'This is to certify that', left:170, top:140, fontSize:12, fill:'#555', fontFamily:'Georgia' },
+    { type:'text', text:'RECIPIENT NAME', left:140, top:168, fontSize:22, fontWeight:'bold', fill:'#1a1a1a', fontFamily:'Georgia' },
+    { type:'text', text:'has successfully completed the program', left:130, top:206, fontSize:11, fill:'#555', fontFamily:'Georgia' },
+    { type:'text', text:'_________________', left:60, top:285, fontSize:18, fill:'#999', fontFamily:'Georgia' },
+    { type:'text', text:'_________________', left:290, top:285, fontSize:18, fill:'#999', fontFamily:'Georgia' },
+    { type:'text', text:'Signature', left:100, top:306, fontSize:9, fill:'#aaa', fontFamily:'Georgia' },
+    { type:'text', text:'Date', left:340, top:306, fontSize:9, fill:'#aaa', fontFamily:'Georgia' },
+  ]},
+  { id: 't5', name: 'Social Post', w: 360, h: 360, bg: '#6c63ff', objects: [
+    { type:'rect', left:0, top:0, width:360, height:360, fill:'#6c63ff', selectable:false },
+    { type:'circle', left:120, top:30, radius:60, fill:'rgba(255,255,255,0.08)', selectable:false },
+    { type:'circle', left:230, top:200, radius:100, fill:'rgba(255,255,255,0.05)', selectable:false },
+    { type:'text', text:'✦ NEW POST ✦', left:110, top:100, fontSize:12, fill:'rgba(255,255,255,0.6)', fontFamily:'DM Sans' },
+    { type:'text', text:'YOUR\nHEADLINE', left:50, top:130, fontSize:38, fontWeight:'bold', fill:'#ffffff', fontFamily:'DM Sans' },
+    { type:'text', text:'Share something amazing with the world.', left:50, top:240, fontSize:12, fill:'rgba(255,255,255,0.75)', fontFamily:'DM Sans' },
+    { type:'rect', left:50, top:290, width:120, height:34, fill:'#ffffff', rx:17, selectable:false },
+    { type:'text', text:'Learn More', left:74, top:299, fontSize:12, fontWeight:'bold', fill:'#6c63ff', fontFamily:'DM Sans' },
+  ]},
+  { id: 't6', name: 'Logo', w: 320, h: 220, bg: '#0f0f11', objects: [
+    { type:'rect', left:0, top:0, width:320, height:220, fill:'#0f0f11', selectable:false },
+    { type:'circle', left:100, top:60, radius:40, fill:'#6c63ff', selectable:false },
+    { type:'triangle', left:134, top:60, width:50, height:50, fill:'#ff6584', selectable:false },
+    { type:'text', text:'BRAND', left:95, top:130, fontSize:28, fontWeight:'bold', fill:'#ffffff', fontFamily:'Space Mono' },
+    { type:'text', text:'TAGLINE HERE', left:98, top:168, fontSize:11, fill:'#6c63ff', fontFamily:'DM Sans' },
+  ]},
+];
+
+const CLIPARTS = ['🌟','🎨','🎭','🎪','🎠','🎡','🌈','⚡','🔥','💎','🌙','☀️','🦋','🌺','🍀','🎸','🎵','🏆','🚀','💡'];
+const SHAPE_DEFS = [
+  { name:'Rect', create: c => new fabric.Rect({ left:100,top:100,width:120,height:80,fill:'#6c63ff',stroke:'transparent',strokeWidth:0,rx:0 }) },
+  { name:'Round', create: c => new fabric.Rect({ left:100,top:100,width:120,height:80,fill:'#ff6584',stroke:'transparent',strokeWidth:0,rx:12 }) },
+  { name:'Circle', create: c => new fabric.Circle({ left:100,top:100,radius:55,fill:'#43e97b',stroke:'transparent',strokeWidth:0 }) },
+  { name:'Triangle', create: c => new fabric.Triangle({ left:100,top:100,width:100,height:100,fill:'#f7c59f',stroke:'transparent',strokeWidth:0 }) },
+  { name:'Line', create: c => new fabric.Line([50,50,250,50],{ left:80,top:130,stroke:'#ffffff',strokeWidth:3 }) },
+  { name:'Star', create: c => {
+    const pts = [];
+    for(let i=0;i<10;i++){const a=(i*36-90)*Math.PI/180;const r=i%2===0?50:22;pts.push({x:60+r*Math.cos(a),y:60+r*Math.sin(a)});}
+    return new fabric.Polygon(pts,{left:100,top:80,fill:'#ffd700',stroke:'transparent',strokeWidth:0});
+  }},
+];
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+function App() {
+  const canvasRef = useRef(null);
+  const fabricRef = useRef(null);
+  const [activePanel, setActivePanel] = useState('text');
+  const [zoom, setZoom] = useState(100);
+  const [history, setHistory] = useState([]);
+  const [histIdx, setHistIdx] = useState(-1);
+  const [selected, setSelected] = useState(null);
+  const [layers, setLayers] = useState([]);
+  const [toast, setToast] = useState(null);
+  const [exportMenu, setExportMenu] = useState(false);
+  const [canvasSize, setCanvasSize] = useState(() => ({ 
+    w: parseInt(new URLSearchParams(window.location.search).get('w')) || 800, 
+    h: parseInt(new URLSearchParams(window.location.search).get('h')) || 560 
+  }));
+  const [showBleed, setShowBleed] = useState(true);
+  const [showSafeZone, setShowSafeZone] = useState(true);
+  const [bleedPx, setBleedPx] = useState(24);      // ~3mm at 8px/mm
+  const [safePx, setSafePx] = useState(40);         // ~5mm at 8px/mm
+  const [show3D, setShow3D] = useState(true);
+  const [preview3DUrl, setPreview3DUrl] = useState(null);
+  const preview3DRef = useRef(null);
+  const [textProps, setTextProps] = useState({ font:'DM Sans', size:24, color:'#ffffff', bold:false, italic:false, underline:false, align:'left' });
+  const historyRef = useRef([]);
+  const histIdxRef = useRef(-1);
+  const suppressHistory = useRef(false);
+
+  const [activeSide, setActiveSide] = useState('front');
+  const sidesRef = useRef({ front: null, back: null });
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [projectName, setProjectName] = useState('');
+
+  const showToast = (msg) => { setToast(msg); setTimeout(()=>setToast(null), 2000); };
+
+  const handleFinishProject = () => {
+    if (!projectName.trim()) {
+       showToast("Please enter a project name");
+       return;
+    }
+    
+    const c = fabricRef.current;
+    const origZ = c.getZoom();
+    c.setZoom(1);
+    c.setWidth(canvasSize.w);
+    c.setHeight(canvasSize.h);
+    const dataUrl = c.toDataURL({ format:'png', multiplier: 2 });
+    c.setZoom(origZ);
+    c.setWidth(canvasSize.w * origZ);
+    c.setHeight(canvasSize.h * origZ);
+    
+    if (window.parent !== window) {
+      window.parent.postMessage({ 
+        type: 'DESIGN_COMPLETED', 
+        projectName: projectName,
+        dataUrl: dataUrl 
+      }, '*');
+    }
+    
+    setShowProjectModal(false);
+  };
+
+  const switchSide = (newSide) => {
+    if (activeSide === newSide) return;
+    const c = fabricRef.current;
+    
+    // Save current side
+    sidesRef.current[activeSide] = JSON.stringify(c.toJSON(['id', 'name']));
+    
+    setActiveSide(newSide);
+    suppressHistory.current = true;
+    
+    if (sidesRef.current[newSide]) {
+      c.loadFromJSON(sidesRef.current[newSide], () => {
+        c.renderAll();
+        updateLayers();
+        suppressHistory.current = false;
+        
+        const json = JSON.stringify(c.toJSON(['id','name']));
+        historyRef.current = [json];
+        histIdxRef.current = 0;
+        setHistory([json]);
+        setHistIdx(0);
+      });
+    } else {
+      c.clear();
+      c.setBackgroundColor('#ffffff', () => {
+        c.renderAll();
+        updateLayers();
+        suppressHistory.current = false;
+        
+        const json = JSON.stringify(c.toJSON(['id','name']));
+        historyRef.current = [json];
+        histIdxRef.current = 0;
+        setHistory([json]);
+        setHistIdx(0);
+      });
+    }
+  };
+
+  // Init canvas
+  useEffect(() => {
+    const canvas = new fabric.Canvas(canvasRef.current, {
+      width: canvasSize.w, height: canvasSize.h,
+      backgroundColor: '#ffffff',
+      preserveObjectStacking: true,
+      fireRightClick: true,
+    });
+    fabricRef.current = canvas;
+
+    // Save initial state
+    const snapshot3D = () => {
+      const url = canvas.toDataURL({ format: 'png', multiplier: 1 });
+      setPreview3DUrl(url);
+    };
+
+    const save = () => {
+      if (suppressHistory.current) return;
+      const json = JSON.stringify(canvas.toJSON(['id','name']));
+      const newH = historyRef.current.slice(0, histIdxRef.current + 1);
+      newH.push(json);
+      if (newH.length > 50) newH.shift();
+      historyRef.current = newH;
+      histIdxRef.current = newH.length - 1;
+      setHistory([...newH]);
+      setHistIdx(histIdxRef.current);
+      updateLayers();
+      snapshot3D();
+    };
+
+    canvas.on('object:added', save);
+    canvas.on('object:modified', save);
+    canvas.on('object:removed', save);
+    canvas.on('object:moving', snapshot3D);
+    canvas.on('object:scaling', snapshot3D);
+    canvas.on('object:rotating', snapshot3D);
+    canvas.on('selection:created', (e) => { setSelected(e.selected[0]); syncTextProps(e.selected[0]); });
+    canvas.on('selection:updated', (e) => { setSelected(e.selected[0]); syncTextProps(e.selected[0]); });
+    canvas.on('selection:cleared', () => setSelected(null));
+
+    save();
+    snapshot3D();
+    return () => canvas.dispose();
+  }, []);
+
+  const syncTextProps = (obj) => {
+    if (!obj) return;
+    if (obj.type === 'i-text' || obj.type === 'textbox' || obj.type === 'text') {
+      setTextProps({
+        font: obj.fontFamily || 'DM Sans',
+        size: obj.fontSize || 24,
+        color: obj.fill || '#ffffff',
+        bold: obj.fontWeight === 'bold',
+        italic: obj.fontStyle === 'italic',
+        underline: obj.underline || false,
+        align: obj.textAlign || 'left',
+      });
+    }
+  };
+
+  const updateLayers = useCallback(() => {
+    const c = fabricRef.current;
+    if (!c) return;
+    const objs = c.getObjects().slice().reverse().map((o,i) => ({
+      id: o.id || i,
+      name: o.name || (o.type==='i-text'||o.type==='textbox'?`Text: "${(o.text||'').slice(0,14)}"`:`${o.type}`),
+      type: o.type,
+      obj: o,
+    }));
+    setLayers(objs);
+  }, []);
+
+  const undo = () => {
+    const c = fabricRef.current;
+    if (histIdxRef.current <= 0) return;
+    histIdxRef.current--;
+    setHistIdx(histIdxRef.current);
+    suppressHistory.current = true;
+    c.loadFromJSON(historyRef.current[histIdxRef.current], () => {
+      c.renderAll();
+      suppressHistory.current = false;
+      updateLayers();
+      setSelected(null);
+    });
+  };
+
+  const redo = () => {
+    const c = fabricRef.current;
+    if (histIdxRef.current >= historyRef.current.length - 1) return;
+    histIdxRef.current++;
+    setHistIdx(histIdxRef.current);
+    suppressHistory.current = true;
+    c.loadFromJSON(historyRef.current[histIdxRef.current], () => {
+      c.renderAll();
+      suppressHistory.current = false;
+      updateLayers();
+      setSelected(null);
+    });
+  };
+
+  const addText = () => {
+    const c = fabricRef.current;
+    const t = new fabric.IText('Double-click to edit', {
+      left: 80 + Math.random()*200, top: 80 + Math.random()*100,
+      fontFamily: textProps.font, fontSize: textProps.size,
+      fill: textProps.color, fontWeight: textProps.bold ? 'bold' : 'normal',
+      fontStyle: textProps.italic ? 'italic' : 'normal',
+      textAlign: textProps.align, name: 'Text',
+    });
+    c.add(t); c.setActiveObject(t); c.renderAll();
+  };
+
+  const addShape = (def) => {
+    const c = fabricRef.current;
+    const obj = def.create(c);
+    obj.name = def.name;
+    c.add(obj); c.setActiveObject(obj); c.renderAll();
+  };
+
+  const addClipart = (emoji) => {
+    const c = fabricRef.current;
+    const t = new fabric.IText(emoji, {
+      left: 100 + Math.random()*200, top: 80 + Math.random()*100,
+      fontSize: 48, fontFamily: 'DM Sans', name: 'Clipart', selectable: true,
+    });
+    c.add(t); c.setActiveObject(t); c.renderAll();
+  };
+
+  const loadTemplate = (tmpl) => {
+    const c = fabricRef.current;
+    suppressHistory.current = true;
+    
+    setCanvasSize({ w: tmpl.w, h: tmpl.h });
+    c.setWidth(tmpl.w * zoom / 100);
+    c.setHeight(tmpl.h * zoom / 100);
+    
+    c.clear();
+    c.setBackgroundColor(tmpl.bg, () => {});
+    tmpl.objects.forEach(od => {
+      let obj;
+      if (od.type === 'rect') obj = new fabric.Rect({...od});
+      else if (od.type === 'circle') obj = new fabric.Circle({...od});
+      else if (od.type === 'triangle') obj = new fabric.Triangle({...od});
+      else if (od.type === 'text') obj = new fabric.IText(od.text, {...od});
+      if (obj) { obj.name = od.type === 'text' ? `Text: "${od.text.slice(0,12)}"` : od.type; c.add(obj); }
+    });
+    c.renderAll();
+    suppressHistory.current = false;
+    // Manually save after template load
+    const json = JSON.stringify(c.toJSON(['id','name']));
+    historyRef.current = [json];
+    histIdxRef.current = 0;
+    setHistory([json]);
+    setHistIdx(0);
+    updateLayers();
+    showToast(`Template "${tmpl.name}" loaded`);
+    setTimeout(() => setPreview3DUrl(c.toDataURL({ format:'png', multiplier:1 })), 50);
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      fabric.Image.fromURL(ev.target.result, (img) => {
+        const c = fabricRef.current;
+        const maxW = canvasSize.w * .5;
+        if (img.width > maxW) { const s = maxW/img.width; img.scale(s); }
+        img.set({ left: 60, top: 60, name: `Image: ${file.name.slice(0,12)}` });
+        c.add(img); c.setActiveObject(img); c.renderAll();
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const deleteSelected = () => {
+    const c = fabricRef.current;
+    const active = c.getActiveObject();
+    if (!active) return;
+    if (active.type === 'activeSelection') { active.forEachObject(o => c.remove(o)); c.discardActiveObject(); }
+    else c.remove(active);
+    c.renderAll();
+    setSelected(null);
+  };
+
+  const duplicateSelected = () => {
+    const c = fabricRef.current;
+    const active = c.getActiveObject();
+    if (!active) return;
+    active.clone(clone => {
+      clone.set({ left: active.left + 20, top: active.top + 20, name: active.name });
+      c.add(clone); c.setActiveObject(clone); c.renderAll();
+    });
+  };
+
+  const bringForward = () => { const c = fabricRef.current; const a = c.getActiveObject(); if(a) { c.bringForward(a); c.renderAll(); updateLayers(); } };
+  const sendBackward = () => { const c = fabricRef.current; const a = c.getActiveObject(); if(a) { c.sendBackwards(a); c.renderAll(); updateLayers(); } };
+
+  const align = (type) => {
+    const c = fabricRef.current;
+    const a = c.getActiveObject();
+    if (!a) return;
+    const cW = canvasSize.w, cH = canvasSize.h;
+    if (type==='left') a.set({left: 0});
+    else if (type==='center') a.set({left: cW/2 - a.getScaledWidth()/2});
+    else if (type==='right') a.set({left: cW - a.getScaledWidth()});
+    else if (type==='top') a.set({top: 0});
+    else if (type==='middle') a.set({top: cH/2 - a.getScaledHeight()/2});
+    else if (type==='bottom') a.set({top: cH - a.getScaledHeight()});
+    a.setCoords(); c.renderAll();
+  };
+
+  const updateTextProp = (key, val) => {
+    const c = fabricRef.current;
+    const a = c.getActiveObject();
+    setTextProps(p => ({...p, [key]: val}));
+    if (!a || (a.type!=='i-text' && a.type!=='textbox')) return;
+    const map = {
+      font: 'fontFamily', size: 'fontSize', color: 'fill',
+      bold: v => a.set('fontWeight', v?'bold':'normal'),
+      italic: v => a.set('fontStyle', v?'italic':'normal'),
+      underline: v => a.set('underline', v),
+      align: 'textAlign',
+    };
+    if (typeof map[key] === 'function') map[key](val);
+    else if (map[key]) a.set(map[key], val);
+    c.renderAll();
+  };
+
+  const updateObjProp = (key, val) => {
+    const c = fabricRef.current;
+    const a = c.getActiveObject();
+    if (!a) return;
+    a.set(key, val);
+    c.renderAll();
+  };
+
+  const changeZoom = (delta) => {
+    const newZ = Math.max(25, Math.min(200, zoom + delta));
+    setZoom(newZ);
+    const c = fabricRef.current;
+    c.setZoom(newZ/100);
+    c.setWidth(canvasSize.w * newZ/100);
+    c.setHeight(canvasSize.h * newZ/100);
+  };
+
+  const exportPNG = () => {
+    const c = fabricRef.current;
+    const origZ = c.getZoom();
+    c.setZoom(1);
+    c.setWidth(canvasSize.w);
+    c.setHeight(canvasSize.h);
+    const url = c.toDataURL({ format:'png', multiplier:2 });
+    c.setZoom(origZ);
+    c.setWidth(canvasSize.w * origZ);
+    c.setHeight(canvasSize.h * origZ);
+    
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'DESIGN_EXPORTED', dataUrl: url }, '*');
+    }
+
+    const a = document.createElement('a');
+    a.href = url; a.download = 'design.png'; a.click();
+    showToast('Exported as PNG!');
+    setExportMenu(false);
+  };
+
+  const exportPDF = () => {
+    const c = fabricRef.current;
+    const origZ = c.getZoom();
+    c.setZoom(1);
+    c.setWidth(canvasSize.w);
+    c.setHeight(canvasSize.h);
+    const imgData = c.toDataURL({ format:'jpeg', quality:0.95 });
+    c.setZoom(origZ);
+    c.setWidth(canvasSize.w * origZ);
+    c.setHeight(canvasSize.h * origZ);
+    // Simple PDF generation using raw PDF syntax
+    const W = canvasSize.w, H = canvasSize.h;
+    const ptW = W * 72 / 96, ptH = H * 72 / 96;
+    const base64 = imgData.split(',')[1];
+    const imgLen = base64.length;
+    let pdf = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${ptW.toFixed(2)} ${ptH.toFixed(2)}] /Contents 4 0 R /Resources << /XObject << /Im1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length 44 >>\nstream\nq ${ptW.toFixed(2)} 0 0 ${ptH.toFixed(2)} 0 0 cm /Im1 Do Q\nendstream\nendobj\n5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${W} /Height ${H} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imgLen} >>\nstream\n`;
+    const blob = new Blob([pdf + base64 + '\nendstream\nendobj\nxref\ntrailer\n<< /Size 6 /Root 1 0 R >>\n%%EOF'], {type:'application/pdf'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'design.pdf'; a.click();
+    showToast('Exported as PDF!');
+    setExportMenu(false);
+  };
+
+  const setBgColor = (color) => {
+    const c = fabricRef.current;
+    c.setBackgroundColor(color, () => c.renderAll());
+  };
+
+  const selectLayerObj = (layerItem) => {
+    const c = fabricRef.current;
+    c.setActiveObject(layerItem.obj);
+    c.renderAll();
+    setSelected(layerItem.obj);
+    syncTextProps(layerItem.obj);
+  };
+
+  const isText = selected && (selected.type === 'i-text' || selected.type === 'textbox');
+  const canUndo = histIdx > 0;
+  const canRedo = histIdx < history.length - 1;
+
+  return (
+    <div className="app">
+      {/* TOPBAR */}
+      <div className="topbar">
+        <div className="logo">Print<span>Craft</span></div>
+        <div className="tb-sep"/>
+        <div style={{ display: 'flex', background: 'var(--surface2)', borderRadius: 6, padding: 2, marginRight: 8 }}>
+          <button 
+            style={{ border: 'none', background: activeSide === 'front' ? 'var(--accent)' : 'transparent', color: activeSide === 'front' ? '#fff' : 'var(--text2)', padding: '4px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 11, fontWeight: 'bold' }}
+            onClick={() => switchSide('front')}
+          >
+            Front Side
+          </button>
+          <button 
+            style={{ border: 'none', background: activeSide === 'back' ? 'var(--accent)' : 'transparent', color: activeSide === 'back' ? '#fff' : 'var(--text2)', padding: '4px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 11, fontWeight: 'bold' }}
+            onClick={() => switchSide('back')}
+          >
+            Back Side
+          </button>
+        </div>
+        <div className="tb-sep"/>
+        <button className="tb-btn" onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)">
+          <Icon d={icons.undo}/> Undo
+        </button>
+        <button className="tb-btn" onClick={redo} disabled={!canRedo} title="Redo">
+          <Icon d={icons.redo}/> Redo
+        </button>
+        <div className="tb-sep"/>
+        <button className="tb-btn" onClick={() => changeZoom(-10)} title="Zoom Out"><Icon d={icons.zoomOut}/></button>
+        <span className="zoom-display">{zoom}%</span>
+        <button className="tb-btn" onClick={() => changeZoom(10)} title="Zoom In"><Icon d={icons.zoomIn}/></button>
+        <div className="tb-sep"/>
+        <button className={`tb-btn ${showBleed?'active':''}`} onClick={()=>setShowBleed(v=>!v)} title="Toggle Bleed Line (red)" style={{gap:5}}>
+          <span style={{display:'inline-block',width:10,height:10,border:'2px dashed #ff6584',borderRadius:2,flexShrink:0}}/>
+          Bleed
+        </button>
+        <button className={`tb-btn ${showSafeZone?'active':''}`} onClick={()=>setShowSafeZone(v=>!v)} title="Toggle Safe Zone (green)" style={{gap:5}}>
+          <span style={{display:'inline-block',width:10,height:10,border:'2px dashed #43e97b',borderRadius:2,flexShrink:0}}/>
+          Safe
+        </button>
+        <div className="tb-sep"/>
+        {/* ALIGN CONTROLS */}
+        <button className="tb-btn" onClick={()=>align('left')} title="Align Left"><Icon d={icons.alignL}/></button>
+        <button className="tb-btn" onClick={()=>align('center')} title="Center H"><Icon d={icons.alignC}/></button>
+        <button className="tb-btn" onClick={()=>align('right')} title="Align Right"><Icon d={icons.alignR}/></button>
+        <button className="tb-btn" onClick={()=>align('top')} title="Align Top"><Icon d={icons.up}/></button>
+        <button className="tb-btn" onClick={()=>align('middle')} title="Center V"><Icon d={icons.grid}/></button>
+        <button className="tb-btn" onClick={()=>align('bottom')} title="Align Bottom"><Icon d={icons.down}/></button>
+        <div className="tb-sep"/>
+        <button className="tb-btn" onClick={duplicateSelected} disabled={!selected} title="Duplicate"><Icon d={icons.copy}/></button>
+        <button className="tb-btn" onClick={deleteSelected} disabled={!selected} title="Delete" style={{color:selected?'var(--accent2)':undefined}}>
+          <Icon d={icons.close}/>
+        </button>
+        <div className="spacer"/>
+        <button className={`tb-btn ${show3D?'active':''}`} onClick={()=>setShow3D(v=>!v)} title="Toggle 3D Preview" style={{gap:5}}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:14,height:14}}>
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          3D
+        </button>
+        <div className="dropdown">
+          <button className="tb-btn export-btn" onClick={() => setExportMenu(m => !m)}>
+            <Icon d={icons.export}/> Export
+          </button>
+          {exportMenu && (
+            <div className="dropdown-menu">
+              <button className="dropdown-item" onClick={exportPNG}>📷 Export as PNG</button>
+              <button className="dropdown-item" onClick={exportPDF}>📄 Export as PDF</button>
+            </div>
+          )}
+        </div>
+        <button className="tb-btn" onClick={() => setShowProjectModal(true)} style={{ marginLeft: 8, background: '#000', color: '#fff', padding: '6px 16px', borderRadius: 6, fontWeight: 'bold' }}>
+          Continue
+        </button>
+      </div>
+
+      {showProjectModal && (
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#fff', borderRadius: 8, padding: 20, width: 400, boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+              <h3 style={{ margin: 0, fontSize: 16 }}>Edit Project Name</h3>
+              <button onClick={() => setShowProjectModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}>×</button>
+            </div>
+            <input 
+              type="text" 
+              placeholder="Enter Job Name" 
+              value={projectName} 
+              onChange={e => setProjectName(e.target.value)}
+              style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: 4, marginBottom: 15, boxSizing: 'border-box' }}
+            />
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setShowProjectModal(false)} style={{ flex: 1, padding: 10, background: '#fff', border: '1px solid #ccc', borderRadius: 4, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={handleFinishProject} style={{ flex: 1, padding: 10, background: '#000', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="main">
+        {/* ICON SIDEBAR */}
+        <div className="icon-bar">
+          {[
+            { key:'text', icon: icons.text, label:'Text' },
+            { key:'shapes', icon: icons.shape, label:'Shapes' },
+            { key:'images', icon: icons.image, label:'Images' },
+            { key:'templates', icon: icons.template, label:'Tpls' },
+            { key:'clipart', icon: icons.clipart, label:'Clipart' },
+            { key:'layers', icon: icons.layer, label:'Layers' },
+          ].map(item => (
+            <button key={item.key} className={`icon-btn ${activePanel===item.key?'active':''}`}
+              onClick={()=>setActivePanel(item.key)} title={item.label}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                {item.icon.split('M').filter(Boolean).map((d,i)=>(
+                  <path key={i} d={'M'+d}/>
+                ))}
+              </svg>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* LEFT PANEL */}
+        <div className="panel">
+          {activePanel === 'text' && <TextPanel textProps={textProps} onUpdate={updateTextProp} onAdd={addText}/>}
+          {activePanel === 'shapes' && <ShapesPanel onAddShape={addShape}/>}
+          {activePanel === 'images' && <ImagesPanel onUpload={handleImageUpload}/>}
+          {activePanel === 'templates' && <TemplatesPanel templates={TEMPLATES} onLoad={loadTemplate}/>}
+          {activePanel === 'clipart' && <ClipartPanel cliparts={CLIPARTS} onAdd={addClipart}/>}
+          {activePanel === 'layers' && <LayersPanel layers={layers} selected={selected} onSelect={selectLayerObj} onBringForward={bringForward} onSendBackward={sendBackward}/>}
+        </div>
+
+        {/* CANVAS */}
+        <div className="canvas-wrap" onClick={(e) => { if(e.target === e.currentTarget) { setExportMenu(false); fabricRef.current?.discardActiveObject(); fabricRef.current?.renderAll(); }}}>
+          <div className="canvas-stage" style={{width: canvasSize.w * zoom/100, height: canvasSize.h * zoom/100, position:'relative'}}>
+            <canvas ref={canvasRef}/>
+            {/* MARGIN OVERLAY — SVG drawn over canvas, pointer-events:none so it never blocks editing */}
+            <MarginOverlay
+              w={canvasSize.w} h={canvasSize.h}
+              zoom={zoom}
+              bleedPx={bleedPx} safePx={safePx}
+              showBleed={showBleed} showSafeZone={showSafeZone}
+            />
+          </div>
+          {/* 3D PREVIEW PANEL — draggable, floats over canvas area */}
+          {show3D && (
+            <Preview3DPanel
+              imageUrl={preview3DUrl}
+              canvasW={canvasSize.w}
+              canvasH={canvasSize.h}
+              onClose={() => setShow3D(false)}
+            />
+          )}
+        </div>
+
+        {/* RIGHT PROPS PANEL */}
+        <div className="props-panel">
+          <PropsPanel selected={selected} isText={isText} textProps={textProps} onTextUpdate={updateTextProp} onObjUpdate={updateObjProp} onBgChange={setBgColor} canvasSize={canvasSize} fabric={fabricRef.current}
+            bleedPx={bleedPx} safePx={safePx} onBleedChange={setBleedPx} onSafeChange={setSafePx}
+            showBleed={showBleed} showSafeZone={showSafeZone} onToggleBleed={()=>setShowBleed(v=>!v)} onToggleSafe={()=>setShowSafeZone(v=>!v)}
+          />
+        </div>
+      </div>
+
+      {/* STATUS BAR */}
+      <div className="statusbar">
+        <span>Canvas: {canvasSize.w}×{canvasSize.h}px</span>
+        <span>·</span>
+        <span>Zoom: {zoom}%</span>
+        <span>·</span>
+        <span>Objects: {layers.length}</span>
+        {showBleed && <><span>·</span><span style={{color:'#ff6584'}}>Bleed: {Math.round(bleedPx/8*10)/10}mm</span></>}
+        {showSafeZone && <><span>·</span><span style={{color:'#43e97b'}}>Safe: {Math.round(safePx/8*10)/10}mm</span></>}
+        {selected && <><span>·</span><span>Selected: {selected.name || selected.type}</span></>}
+      </div>
+
+      {toast && <div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+// ─── MARGIN OVERLAY ───────────────────────────────────────────────────────────
+// Pure SVG overlay rendered on top of the Fabric canvas.
+// pointer-events:none ensures it NEVER interferes with canvas interactions.
+function MarginOverlay({ w, h, zoom, bleedPx, safePx, showBleed, showSafeZone }) {
+  const scale = zoom / 100;
+  const sw = w * scale;
+  const sh = h * scale;
+  // Scale the margin values with zoom so lines stay aligned to canvas content
+  const b = bleedPx * scale;
+  const s = safePx * scale;
+  const dashScale = Math.max(0.5, scale);
+
+  return (
+    <svg
+      style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%', pointerEvents:'none', overflow:'visible' }}
+      viewBox={`0 0 ${sw} ${sh}`}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        {/* scissors marker for bleed corner */}
+        <marker id="scissors" markerWidth="14" markerHeight="14" refX="7" refY="7" orient="0">
+          <text x="1" y="11" fontSize="12" fill="#ff6584" style={{userSelect:'none'}}>✂</text>
+        </marker>
+      </defs>
+
+      {/* ── BLEED LINE (red dashed, outermost) ── */}
+      {showBleed && (
+        <g>
+          <rect
+            x={b} y={b}
+            width={sw - b*2} height={sh - b*2}
+            fill="none"
+            stroke="#FF2D55"
+            strokeWidth={1.5 * dashScale}
+            strokeDasharray={`${10*dashScale} ${6*dashScale}`}
+            strokeLinecap="square"
+          />
+          {/* Corner bracket marks — top-left */}
+          <line x1={b} y1={b} x2={b + 18*dashScale} y2={b} stroke="#FF2D55" strokeWidth={1.5*dashScale}/>
+          <line x1={b} y1={b} x2={b} y2={b + 18*dashScale} stroke="#FF2D55" strokeWidth={1.5*dashScale}/>
+          {/* Corner bracket marks — top-right */}
+          <line x1={sw-b} y1={b} x2={sw-b - 18*dashScale} y2={b} stroke="#FF2D55" strokeWidth={1.5*dashScale}/>
+          <line x1={sw-b} y1={b} x2={sw-b} y2={b + 18*dashScale} stroke="#FF2D55" strokeWidth={1.5*dashScale}/>
+          {/* Corner bracket marks — bottom-left */}
+          <line x1={b} y1={sh-b} x2={b + 18*dashScale} y2={sh-b} stroke="#FF2D55" strokeWidth={1.5*dashScale}/>
+          <line x1={b} y1={sh-b} x2={b} y2={sh-b - 18*dashScale} stroke="#FF2D55" strokeWidth={1.5*dashScale}/>
+          {/* Corner bracket marks — bottom-right */}
+          <line x1={sw-b} y1={sh-b} x2={sw-b - 18*dashScale} y2={sh-b} stroke="#FF2D55" strokeWidth={1.5*dashScale}/>
+          <line x1={sw-b} y1={sh-b} x2={sw-b} y2={sh-b - 18*dashScale} stroke="#FF2D55" strokeWidth={1.5*dashScale}/>
+          {/* ✂ scissors icon at top-left */}
+          <text x={b + 2} y={b - 4} fontSize={12 * dashScale} fill="#FF2D55" style={{userSelect:'none',fontFamily:'sans-serif'}}>✂</text>
+          {/* Label */}
+          <text x={sw/2} y={b - 5*dashScale} textAnchor="middle" fontSize={9*dashScale} fill="#FF2D55" style={{userSelect:'none',fontFamily:'-apple-system,sans-serif',fontWeight:500,letterSpacing:'0.05em'}}>BLEED</text>
+        </g>
+      )}
+
+      {/* ── SAFE ZONE LINE (green dashed, inner) ── */}
+      {showSafeZone && (
+        <g>
+          <rect
+            x={s} y={s}
+            width={sw - s*2} height={sh - s*2}
+            fill="none"
+            stroke="#34C759"
+            strokeWidth={1.5 * dashScale}
+            strokeDasharray={`${8*dashScale} ${5*dashScale}`}
+            strokeLinecap="square"
+          />
+          {/* Small dot anchors at corners */}
+          {[[s,s],[sw-s,s],[s,sh-s],[sw-s,sh-s]].map(([cx,cy],i) => (
+            <circle key={i} cx={cx} cy={cy} r={3.5*dashScale} fill="#34C759"/>
+          ))}
+          {/* Label */}
+          <text x={sw/2} y={sh - s + 13*dashScale} textAnchor="middle" fontSize={9*dashScale} fill="#34C759" style={{userSelect:'none',fontFamily:'-apple-system,sans-serif',fontWeight:500,letterSpacing:'0.05em'}}>SAFE ZONE</text>
+        </g>
+      )}
+
+      {/* ── CROSSHAIR at canvas center ── */}
+      {(showBleed || showSafeZone) && (
+        <g opacity="0.18">
+          <line x1={sw/2} y1={0} x2={sw/2} y2={sh} stroke="#888" strokeWidth={0.8} strokeDasharray="4 4"/>
+          <line x1={0} y1={sh/2} x2={sw} y2={sh/2} stroke="#888" strokeWidth={0.8} strokeDasharray="4 4"/>
+        </g>
+      )}
+    </svg>
+  );
+}
+
+// ─── TEXT PANEL ───────────────────────────────────────────────────────────────
+function TextPanel({ textProps, onUpdate, onAdd }) {
+  const textStyles = [
+    { label:'Heading', size:36, bold:true,  desc:'Large display text' },
+    { label:'Subheading', size:22, bold:false, desc:'Section titles' },
+    { label:'Body', size:14, bold:false, desc:'Main content' },
+    { label:'Caption', size:11, bold:false, desc:'Small labels' },
+  ];
+  return (
+    <div>
+      <div className="section-header">Text</div>
+      <div className="panel-section">
+        <div style={{display:'flex',flexDirection:'column',gap:5}}>
+          {textStyles.map(p => (
+            <button key={p.label} className="add-text-btn"
+              onClick={() => { onUpdate('size', p.size); onUpdate('bold', p.bold); onAdd(); }}>
+              <div className="add-text-btn-icon" style={{fontSize:p.bold?13:11,fontWeight:p.bold?700:400}}>T</div>
+              <div style={{flex:1,textAlign:'left'}}>
+                <div style={{fontSize:Math.min(p.size/2.8,14),fontWeight:p.bold?700:400,lineHeight:1,color:'var(--text)'}}>{p.label}</div>
+                <div style={{fontSize:10,color:'var(--text3)',marginTop:1}}>{p.desc}</div>
+              </div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{width:12,height:12,color:'var(--text4)',flexShrink:0}}><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="panel-section">
+        <div className="panel-title">Typeface</div>
+        <div className="scroll-section">
+          {FONTS.map(f => (
+            <div key={f} className={`font-item ${textProps.font===f?'active':''}`}
+              style={{fontFamily:f}} onClick={()=>onUpdate('font',f)}>{f}</div>
+          ))}
+        </div>
+      </div>
+      <div className="panel-section">
+        <div className="panel-title">Size</div>
+        <div className="panel-grid-3">
+          {FONT_SIZES.map(s => (
+            <button key={s} className={`size-pill ${textProps.size===s?'active':''}`}
+              onClick={()=>onUpdate('size',s)}>{s}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SHAPES PANEL ─────────────────────────────────────────────────────────────
+function ShapesPanel({ onAddShape }) {
+  return (
+    <div>
+      <div className="section-header">Shapes</div>
+      <div className="panel-section">
+        <div className="panel-grid">
+          {SHAPE_DEFS.map(s => (
+            <button key={s.name} className="shape-btn" onClick={()=>onAddShape(s)} title={s.name}>
+              {s.name === 'Rect' && <svg viewBox="0 0 40 30"><rect x="2" y="2" width="36" height="26" fill="currentColor"/></svg>}
+              {s.name === 'Round' && <svg viewBox="0 0 40 30"><rect x="2" y="2" width="36" height="26" rx="7" fill="currentColor"/></svg>}
+              {s.name === 'Circle' && <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="currentColor"/></svg>}
+              {s.name === 'Triangle' && <svg viewBox="0 0 36 36"><polygon points="18,2 35,34 1,34" fill="currentColor"/></svg>}
+              {s.name === 'Line' && <svg viewBox="0 0 36 36"><line x1="2" y1="18" x2="34" y2="18" stroke="currentColor" strokeWidth="3"/></svg>}
+              {s.name === 'Star' && <svg viewBox="0 0 36 36"><polygon points="18,2 22,13 34,13 25,20 28,32 18,25 8,32 11,20 2,13 14,13" fill="currentColor"/></svg>}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── IMAGES PANEL ─────────────────────────────────────────────────────────────
+function ImagesPanel({ onUpload }) {
+  const inputRef = useRef(null);
+  return (
+    <div>
+      <div className="section-header">Photos</div>
+      <div className="panel-section">
+        <div className="upload-zone" onClick={()=>inputRef.current.click()}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{display:'block',margin:'0 auto 10px'}}>
+            <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 5v12"/>
+          </svg>
+          <div style={{fontWeight:500,color:'var(--accent)',marginBottom:2}}>Upload Image</div>
+          <div style={{fontSize:11,color:'var(--text4)'}}>PNG, JPG, SVG, GIF</div>
+        </div>
+        <input ref={inputRef} type="file" accept="image/*" onChange={onUpload}/>
+        <div style={{marginTop:10,padding:'10px',background:'var(--surface3)',borderRadius:10,display:'flex',gap:8,alignItems:'flex-start'}}>
+          <span style={{fontSize:15,flexShrink:0}}>💡</span>
+          <div style={{fontSize:11,color:'var(--text3)',lineHeight:1.6}}>Drag corners to resize. Adjust opacity in the Properties panel.</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── TEMPLATES PANEL ──────────────────────────────────────────────────────────
+function TemplatesPanel({ templates, onLoad }) {
+  const [customW, setCustomW] = React.useState(800);
+  const [customH, setCustomH] = React.useState(600);
+  const [unit, setUnit] = React.useState('px');
+
+  const handleApply = () => {
+    let multiplier = 1;
+    if (unit === 'in') multiplier = 300; // 300 DPI
+    if (unit === 'cm') multiplier = 118.11;
+    if (unit === 'mm') multiplier = 11.811;
+    
+    const w = Math.round((Number(customW) || 800) * multiplier);
+    const h = Math.round((Number(customH) || 600) * multiplier);
+    
+    onLoad({ id: 'custom', name: `Custom Size`, w, h, bg: '#ffffff', objects: [] });
+  };
+  const bgs = [
+    'linear-gradient(135deg,#007AFF22,#5856D622)',
+    'linear-gradient(135deg,#FF2D5522,#FF950022)',
+    'linear-gradient(135deg,#34C75922,#30D15822)',
+    'linear-gradient(135deg,#AF52DE22,#FF2D5522)',
+    'linear-gradient(135deg,#FF950022,#FFD60022)',
+    'linear-gradient(135deg,#5AC8FA22,#007AFF22)',
+  ];
+  return (
+    <div>
+      <div className="section-header">Templates</div>
+      <div className="panel-section">
+        <div className="panel-grid">
+          {templates.map((t,i) => (
+            <div key={t.id} className="tmpl-card" onClick={()=>onLoad(t)}>
+              <div className="tmpl-thumb" style={{background:bgs[i%bgs.length],width:'100%',height:'100%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3}}>
+                <div style={{width:20,height:2,borderRadius:1,background:'rgba(0,0,0,.15)',marginBottom:2}}/>
+                <div style={{width:28,height:1.5,borderRadius:1,background:'rgba(0,0,0,.1)'}}/>
+                <div style={{width:22,height:1.5,borderRadius:1,background:'rgba(0,0,0,.1)'}}/>
+                <div style={{fontSize:8,fontWeight:600,color:'var(--text2)',marginTop:4,letterSpacing:.02}}>{t.name}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="panel-section">
+        <div className="panel-title">Custom Canvas Size</div>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10, alignItems: 'center' }}>
+          <input type="number" className="prop-input" placeholder="W" value={customW} onChange={e => setCustomW(e.target.value)} style={{ textAlign: 'center', flex: 1, minWidth: 0, padding: 0 }} />
+          <span style={{ color: 'var(--text4)', fontSize: 12, fontWeight: 'bold' }}>×</span>
+          <input type="number" className="prop-input" placeholder="H" value={customH} onChange={e => setCustomH(e.target.value)} style={{ textAlign: 'center', flex: 1, minWidth: 0, padding: 0 }} />
+          <select value={unit} onChange={e => setUnit(e.target.value)} style={{ flex: 0.8, minWidth: 0, padding: '4px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--surface2)', color: 'var(--text)', fontSize: '11px' }}>
+            <option value="px">px</option>
+            <option value="mm">mm</option>
+            <option value="cm">cm</option>
+            <option value="in">in</option>
+          </select>
+        </div>
+        <button className="add-text-btn" style={{ justifyContent: 'center' }} onClick={handleApply}>
+          Apply Custom Size
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── CLIPART PANEL ────────────────────────────────────────────────────────────
+function ClipartPanel({ cliparts, onAdd }) {
+  return (
+    <div>
+      <div className="section-header">Stickers</div>
+      <div className="panel-section">
+        <div className="panel-grid-3">
+          {cliparts.map(e => (
+            <div key={e} className="clipart-item" onClick={()=>onAdd(e)}>{e}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── LAYERS PANEL ─────────────────────────────────────────────────────────────
+function LayersPanel({ layers, selected, onSelect, onBringForward, onSendBackward }) {
+  return (
+    <div>
+      <div className="section-header" style={{display:'flex',alignItems:'center',justifyContent:'space-between',paddingRight:12}}>
+        <span>Layers</span>
+        <span style={{fontSize:12,fontWeight:400,color:'var(--text4)'}}>{layers.length}</span>
+      </div>
+      <div className="panel-section">
+        <div style={{display:'flex',gap:6,marginBottom:10}}>
+          <button className="add-text-btn" onClick={onBringForward} style={{flex:1,justifyContent:'center',height:30,fontSize:12}}>
+            ↑ Forward
+          </button>
+          <button className="add-text-btn" onClick={onSendBackward} style={{flex:1,justifyContent:'center',height:30,fontSize:12}}>
+            ↓ Backward
+          </button>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:2}}>
+          {layers.length === 0 && (
+            <div style={{textAlign:'center',padding:'20px 0',color:'var(--text4)',fontSize:12}}>No objects yet</div>
+          )}
+          {layers.map((l,i) => (
+            <div key={i} className={`layer-item ${l.obj===selected?'selected':''}`} onClick={()=>onSelect(l)}>
+              <span style={{fontSize:15,width:20,textAlign:'center',flexShrink:0}}>
+                {l.type==='i-text'||l.type==='textbox'?'T':l.type==='circle'?'◯':l.type==='triangle'?'△':l.type==='image'?'🖼':'▭'}
+              </span>
+              <span className="layer-item-name">{l.name}</span>
+              <span className="layer-item-type">{l.type.replace('i-text','text')}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── iOS TOGGLE ───────────────────────────────────────────────────────────────
+function IOSToggle({ checked, onChange }) {
+  return (
+    <label className="ios-toggle">
+      <input type="checkbox" checked={checked} onChange={e=>onChange(e.target.checked)}/>
+      <div className="ios-toggle-track"/>
+      <div className="ios-toggle-thumb"/>
+    </label>
+  );
+}
+
+// ─── PROPS PANEL ──────────────────────────────────────────────────────────────
+function PropsPanel({ selected, isText, textProps, onTextUpdate, onObjUpdate, onBgChange, canvasSize,
+  bleedPx, safePx, onBleedChange, onSafeChange, showBleed, showSafeZone, onToggleBleed, onToggleSafe }) {
+  const [bgColor, setBgColor] = useState('#ffffff');
+  const [activeTab, setActiveTab] = useState('props');
+
+  const bgSwatches = ['#ffffff','#1c1c1e','#f2f2f7','#007AFF','#FF2D55','#34C759','#FF9500','#AF52DE'];
+
+  return (
+    <div>
+      <div className="tab-row">
+        <button className={`tab ${activeTab==='props'?'active':''}`} onClick={()=>setActiveTab('props')}>Inspect</button>
+        <button className={`tab ${activeTab==='canvas'?'active':''}`} onClick={()=>setActiveTab('canvas')}>Canvas</button>
+      </div>
+
+      {activeTab === 'props' && (
+        <div>
+          {!selected && (
+            <div style={{padding:'40px 16px',textAlign:'center'}}>
+              <div style={{fontSize:28,marginBottom:8}}>✦</div>
+              <div style={{fontSize:13,fontWeight:500,color:'var(--text2)',marginBottom:4}}>Nothing selected</div>
+              <div style={{fontSize:11,color:'var(--text4)',lineHeight:1.6}}>Tap an object on the canvas to inspect and edit its properties.</div>
+            </div>
+          )}
+          {selected && (
+            <>
+              {/* Position */}
+              <div className="panel-section">
+                <div className="panel-title">Transform</div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginBottom:8}}>
+                  <div>
+                    <div style={{fontSize:9,color:'var(--text4)',marginBottom:3,fontWeight:600,letterSpacing:.04}}>X</div>
+                    <input className="prop-input" type="number" value={Math.round(selected.left)||0} onChange={e=>onObjUpdate('left',+e.target.value)} style={{width:'100%'}}/>
+                  </div>
+                  <div>
+                    <div style={{fontSize:9,color:'var(--text4)',marginBottom:3,fontWeight:600,letterSpacing:.04}}>Y</div>
+                    <input className="prop-input" type="number" value={Math.round(selected.top)||0} onChange={e=>onObjUpdate('top',+e.target.value)} style={{width:'100%'}}/>
+                  </div>
+                </div>
+                <div className="prop-row" style={{marginBottom:6}}>
+                  <span className="prop-label">Rotate</span>
+                  <input className="prop-input" type="range" min={0} max={360} value={Math.round(selected.angle||0)} onChange={e=>onObjUpdate('angle',+e.target.value)}/>
+                  <span style={{fontSize:11,fontWeight:500,color:'var(--text3)',minWidth:32,textAlign:'right'}}>{Math.round(selected.angle||0)}°</span>
+                </div>
+                <div className="prop-row" style={{marginBottom:0}}>
+                  <span className="prop-label">Opacity</span>
+                  <input className="prop-input" type="range" min={0} max={1} step={0.01} value={selected.opacity??1} onChange={e=>onObjUpdate('opacity',+e.target.value)}/>
+                  <span style={{fontSize:11,fontWeight:500,color:'var(--text3)',minWidth:32,textAlign:'right'}}>{Math.round((selected.opacity??1)*100)}%</span>
+                </div>
+              </div>
+
+              {/* Text properties */}
+              {isText && (
+                <div className="panel-section">
+                  <div className="panel-title">Typography</div>
+                  <div style={{marginBottom:8}}>
+                    <div style={{fontSize:9,color:'var(--text4)',marginBottom:4,fontWeight:600,letterSpacing:.04}}>TYPEFACE</div>
+                    <select className="prop-select" style={{width:'100%'}} value={textProps.font} onChange={e=>onTextUpdate('font',e.target.value)}>
+                      {FONTS.map(f=><option key={f}>{f}</option>)}
+                    </select>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr auto',gap:6,marginBottom:8,alignItems:'end'}}>
+                    <div>
+                      <div style={{fontSize:9,color:'var(--text4)',marginBottom:3,fontWeight:600,letterSpacing:.04}}>SIZE</div>
+                      <input className="prop-input" type="number" value={textProps.size} min={6} max={200} style={{width:'100%'}} onChange={e=>onTextUpdate('size',+e.target.value)}/>
+                    </div>
+                    <div>
+                      <div style={{fontSize:9,color:'var(--text4)',marginBottom:3,fontWeight:600,letterSpacing:.04}}>COLOR</div>
+                      <input className="prop-input" type="color" value={textProps.color} onChange={e=>onTextUpdate('color',e.target.value)} style={{width:40,height:28}}/>
+                    </div>
+                  </div>
+                  {/* Style buttons - pill group */}
+                  <div style={{marginBottom:8}}>
+                    <div style={{fontSize:9,color:'var(--text4)',marginBottom:5,fontWeight:600,letterSpacing:.04}}>STYLE</div>
+                    <div style={{display:'flex',background:'var(--surface3)',borderRadius:9,padding:2,gap:0}}>
+                      {[
+                        { key:'bold', label:'B', style:{fontWeight:700} },
+                        { key:'italic', label:'I', style:{fontStyle:'italic'} },
+                        { key:'underline', label:'U', style:{textDecoration:'underline'} },
+                      ].map(s=>(
+                        <button key={s.key}
+                          onClick={()=>onTextUpdate(s.key,!textProps[s.key])}
+                          style={{flex:1,height:28,border:'none',borderRadius:7,fontSize:13,cursor:'pointer',transition:'all .15s',fontFamily:'inherit',
+                            background:textProps[s.key]?'white':'transparent',
+                            color:textProps[s.key]?'var(--accent)':'var(--text3)',
+                            boxShadow:textProps[s.key]?'0 1px 3px rgba(0,0,0,.10)':'none',
+                            ...s.style}}>
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Alignment */}
+                  <div>
+                    <div style={{fontSize:9,color:'var(--text4)',marginBottom:5,fontWeight:600,letterSpacing:.04}}>ALIGN</div>
+                    <div style={{display:'flex',background:'var(--surface3)',borderRadius:9,padding:2,gap:0}}>
+                      {[
+                        {a:'left', icon:'⬜⬜\n⬜·'},
+                        {a:'center', icon:'≡'},
+                        {a:'right', icon:'≡'},
+                        {a:'justify', icon:'≡'},
+                      ].map(({a})=>(
+                        <button key={a}
+                          onClick={()=>onTextUpdate('align',a)}
+                          style={{flex:1,height:28,border:'none',borderRadius:7,fontSize:10,fontWeight:600,cursor:'pointer',transition:'all .15s',fontFamily:'inherit',textTransform:'capitalize',
+                            background:textProps.align===a?'white':'transparent',
+                            color:textProps.align===a?'var(--accent)':'var(--text3)',
+                            boxShadow:textProps.align===a?'0 1px 3px rgba(0,0,0,.10)':'none'}}>
+                          {a[0].toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Fill & Stroke for shapes */}
+              {!isText && selected.fill !== undefined && (
+                <div className="panel-section">
+                  <div className="panel-title">Appearance</div>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+                    <div>
+                      <div style={{fontSize:9,color:'var(--text4)',marginBottom:4,fontWeight:600,letterSpacing:.04}}>FILL</div>
+                      <input className="prop-input" type="color" value={selected.fill||'#000000'} onChange={e=>onObjUpdate('fill',e.target.value)} style={{width:'100%',height:36,borderRadius:10}}/>
+                    </div>
+                    <div>
+                      <div style={{fontSize:9,color:'var(--text4)',marginBottom:4,fontWeight:600,letterSpacing:.04}}>STROKE</div>
+                      <input className="prop-input" type="color" value={selected.stroke||'#000000'} onChange={e=>onObjUpdate('stroke',e.target.value)} style={{width:'100%',height:36,borderRadius:10}}/>
+                    </div>
+                  </div>
+                  <div style={{marginTop:8}}>
+                    <div style={{fontSize:9,color:'var(--text4)',marginBottom:4,fontWeight:600,letterSpacing:.04}}>STROKE WIDTH</div>
+                    <input className="prop-input" type="number" value={selected.strokeWidth||0} min={0} max={20} style={{width:'100%'}} onChange={e=>onObjUpdate('strokeWidth',+e.target.value)}/>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'canvas' && (
+        <div>
+          {/* Background */}
+          <div className="panel-section">
+            <div className="panel-title">Background</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6,marginBottom:10}}>
+              {bgSwatches.map(c=>(
+                <div key={c}
+                  onClick={()=>{setBgColor(c);onBgChange(c);}}
+                  style={{
+                    height:32,borderRadius:10,background:c,cursor:'pointer',
+                    border: bgColor===c ? '2.5px solid var(--accent)' : '1px solid var(--border)',
+                    boxShadow: bgColor===c ? '0 2px 8px rgba(0,122,255,.2)' : 'none',
+                    transition:'all .15s cubic-bezier(0.34,1.56,0.64,1)',
+                    transform: bgColor===c ? 'scale(1.06)' : 'scale(1)',
+                  }}/>
+              ))}
+            </div>
+            <div className="prop-row" style={{marginBottom:0}}>
+              <span className="prop-label">Custom</span>
+              <input className="prop-input" type="color" value={bgColor} onChange={e=>{setBgColor(e.target.value);onBgChange(e.target.value);}} style={{width:'100%',height:32,borderRadius:10}}/>
+            </div>
+            <div style={{marginTop:8,fontSize:10,color:'var(--text4)',fontWeight:500}}>{canvasSize.w} × {canvasSize.h} px</div>
+          </div>
+
+          {/* Print Margins with iOS-style rows */}
+          <div className="panel-section">
+            <div className="panel-title">Print Guides</div>
+
+            {/* Bleed */}
+            <div style={{background:'var(--surface3)',borderRadius:12,padding:'2px 0',marginBottom:8}}>
+              <div style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px'}}>
+                <div style={{width:10,height:10,border:'2px dashed #FF2D55',borderRadius:2,flexShrink:0}}/>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:12,fontWeight:500,color:'var(--text)'}}>Bleed Line</div>
+                  <div style={{fontSize:10,color:'var(--text4)'}}>Outer cut boundary</div>
+                </div>
+                <IOSToggle checked={showBleed} onChange={onToggleBleed}/>
+              </div>
+              {showBleed && (
+                <div style={{padding:'0 12px 10px',borderTop:'0.5px solid var(--border2)'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:8,marginTop:8}}>
+                    <input className="prop-input" type="range" min={8} max={60} step={2} value={bleedPx} onChange={e=>onBleedChange(+e.target.value)} style={{flex:1}}/>
+                    <span style={{fontSize:11,fontWeight:600,color:'#FF2D55',minWidth:38,textAlign:'right'}}>{Math.round(bleedPx/8*10)/10}mm</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Safe zone */}
+            <div style={{background:'var(--surface3)',borderRadius:12,padding:'2px 0'}}>
+              <div style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px'}}>
+                <div style={{width:10,height:10,border:'2px dashed #34C759',borderRadius:2,flexShrink:0}}/>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:12,fontWeight:500,color:'var(--text)'}}>Safe Zone</div>
+                  <div style={{fontSize:10,color:'var(--text4)'}}>Keep content inside</div>
+                </div>
+                <IOSToggle checked={showSafeZone} onChange={onToggleSafe}/>
+              </div>
+              {showSafeZone && (
+                <div style={{padding:'0 12px 10px',borderTop:'0.5px solid var(--border2)'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:8,marginTop:8}}>
+                    <input className="prop-input" type="range" min={16} max={80} step={2} value={safePx} onChange={e=>onSafeChange(+e.target.value)} style={{flex:1}}/>
+                    <span style={{fontSize:11,fontWeight:600,color:'#34C759',minWidth:38,textAlign:'right'}}>{Math.round(safePx/8*10)/10}mm</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── 3D PREVIEW PANEL ─────────────────────────────────────────────────────────
+function Preview3DPanel({ imageUrl, canvasW, canvasH, onClose }) {
+  const mountRef = useRef(null);
+  const threeRef = useRef({});
+  const dragRef = useRef({ dragging: false, startX: 0, startY: 0 });
+  const panelRef = useRef(null);
+  const [pos, setPos] = useState({ left: 16, top: 16 });
+  const [shape, setShape] = useState('flat');
+  const [autoRotate, setAutoRotate] = useState(true);
+  const [envLight, setEnvLight] = useState('studio');
+  const rotRef = useRef({ x: 0.18, y: 0.3, velX: 0, velY: 0, down: false, lastX: 0, lastY: 0 });
+
+  const PW = 320, PH = 210;
+  const aspect = canvasW / canvasH;
+
+  useEffect(() => {
+    const el = mountRef.current;
+    if (!el || !window.THREE) return;
+    const T = window.THREE;
+
+    const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(PW, PH);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = T.PCFSoftShadowMap;
+    el.appendChild(renderer.domElement);
+
+    const scene = new T.Scene();
+    scene.background = new T.Color(0xf2f2f7);
+
+    const camera = new T.PerspectiveCamera(36, PW / PH, 0.1, 100);
+    camera.position.set(0, 0.5, 3.8);
+    camera.lookAt(0, 0, 0);
+
+    // Lights
+    const ambient = new T.AmbientLight(0xffffff, 0.5);
+    const keyLight = new T.DirectionalLight(0xffffff, 1.3);
+    keyLight.position.set(3, 4, 3);
+    keyLight.castShadow = true;
+    const fillLight = new T.DirectionalLight(0x8899ff, 0.3);
+    fillLight.position.set(-3, 1, 2);
+    const rimLight = new T.DirectionalLight(0xffffff, 0.35);
+    rimLight.position.set(0, -3, -3);
+    scene.add(ambient, keyLight, fillLight, rimLight);
+
+    // Floor shadow catcher
+    const floor = new T.Mesh(
+      new T.PlaneGeometry(12, 12),
+      new T.ShadowMaterial({ opacity: 0.2 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -1.1;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    // Texture
+    const tex = new T.Texture();
+    tex.needsUpdate = false;
+
+    const buildMesh = (shapeName) => {
+      // Remove old
+      const old = threeRef.current.meshGroup;
+      if (old) { scene.remove(old); }
+
+      const group = new T.Group();
+      const stdOpts = { map: tex, roughness: 0.2, metalness: 0.04, side: T.DoubleSide };
+
+      if (shapeName === 'flat') {
+        const geo = new T.BoxGeometry(aspect * 1.7, 1.7, 0.012, 1, 1, 1);
+        const mat = new T.MeshStandardMaterial({ ...stdOpts });
+        const m = new T.Mesh(geo, mat);
+        m.castShadow = true;
+        // Paper edge highlight
+        const edgeMat = new T.MeshStandardMaterial({ color: 0xddddcc, roughness: 0.6, metalness: 0 });
+        const edgeGeo = new T.BoxGeometry(aspect * 1.7 + 0.01, 1.7 + 0.01, 0.013);
+        const edge = new T.Mesh(edgeGeo, edgeMat);
+        edge.position.z = -0.001;
+        group.add(m, edge);
+
+      } else if (shapeName === 'folded') {
+        const hw = (aspect / 2) * 1.6;
+        const pGeo = new T.BoxGeometry(hw, 1.6, 0.012);
+        const mat1 = new T.MeshStandardMaterial({ ...stdOpts });
+        const mat2 = new T.MeshStandardMaterial({ ...stdOpts });
+        const left = new T.Mesh(pGeo, mat1);
+        left.position.x = -(hw / 2 + 0.006);
+        left.rotation.y = 0.22;
+        left.castShadow = true;
+        const right = new T.Mesh(pGeo.clone(), mat2);
+        right.position.x = (hw / 2 + 0.006);
+        right.rotation.y = -0.22;
+        right.castShadow = true;
+        group.add(left, right);
+
+      } else if (shapeName === 'cylinder') {
+        const geo = new T.CylinderGeometry(0.68, 0.68, 1.6, 80, 1, true);
+        const mat = new T.MeshStandardMaterial({ ...stdOpts, side: T.FrontSide });
+        const m = new T.Mesh(geo, mat);
+        m.castShadow = true;
+        // caps
+        const capGeo = new T.CircleGeometry(0.68, 80);
+        const capMat = new T.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.5 });
+        const capT = new T.Mesh(capGeo, capMat);
+        capT.position.y = 0.8; capT.rotation.x = -Math.PI / 2;
+        const capB = capT.clone(); capB.position.y = -0.8; capB.rotation.x = Math.PI / 2;
+        group.add(m, capT, capB);
+
+      } else if (shapeName === 'book') {
+        const bw = aspect * 1.3, bh = 1.65, bd = 0.22;
+        // Cover materials: [right, left, top, bottom, front, back]
+        const coverMat = new T.MeshStandardMaterial({ ...stdOpts, side: T.FrontSide });
+        const sideMat = new T.MeshStandardMaterial({ color: 0x222230, roughness: 0.7 });
+        const spineMat = new T.MeshStandardMaterial({ color: 0x1a1a28, roughness: 0.8 });
+        const mats = [sideMat, spineMat, sideMat, sideMat, coverMat, sideMat];
+        const geo = new T.BoxGeometry(bw, bh, bd);
+        const m = new T.Mesh(geo, mats);
+        m.castShadow = true;
+        // Pages stack
+        const pgGeo = new T.BoxGeometry(bw - 0.04, bh - 0.06, bd - 0.04);
+        const pgMat = new T.MeshStandardMaterial({ color: 0xf8f5ec, roughness: 0.9 });
+        const pages = new T.Mesh(pgGeo, pgMat);
+        pages.position.set(0.02, 0, 0);
+        group.add(m, pages);
+      }
+
+      group.castShadow = true;
+      scene.add(group);
+      threeRef.current.meshGroup = group;
+      threeRef.current.tex = tex;
+      return group;
+    };
+
+    buildMesh(shape);
+    threeRef.current = { ...threeRef.current, renderer, scene, camera, ambient, keyLight, fillLight, rimLight, buildMesh };
+
+    // Mouse / touch rotate
+    const dom = renderer.domElement;
+    const onDown = (e) => { rotRef.current.down = true; rotRef.current.lastX = e.clientX ?? e.touches?.[0]?.clientX; rotRef.current.lastY = e.clientY ?? e.touches?.[0]?.clientY; rotRef.current.velX = 0; rotRef.current.velY = 0; };
+    const onMove = (e) => {
+      if (!rotRef.current.down) return;
+      const cx = e.clientX ?? e.touches?.[0]?.clientX;
+      const cy = e.clientY ?? e.touches?.[0]?.clientY;
+      const dx = cx - rotRef.current.lastX;
+      const dy = cy - rotRef.current.lastY;
+      rotRef.current.velX = dx * 0.013;
+      rotRef.current.velY = dy * 0.013;
+      rotRef.current.y += rotRef.current.velX;
+      rotRef.current.x += rotRef.current.velY;
+      rotRef.current.x = Math.max(-1.15, Math.min(1.15, rotRef.current.x));
+      rotRef.current.lastX = cx; rotRef.current.lastY = cy;
+    };
+    const onUp = () => { rotRef.current.down = false; };
+    dom.addEventListener('mousedown', onDown);
+    dom.addEventListener('touchstart', e => onDown(e.touches[0] ? {clientX: e.touches[0].clientX, clientY: e.touches[0].clientY} : e), { passive: true });
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchmove', e => onMove({clientX: e.touches[0]?.clientX, clientY: e.touches[0]?.clientY}), { passive: true });
+    window.addEventListener('touchend', onUp);
+
+    // Render loop
+    let raf;
+    const animate = () => {
+      raf = requestAnimationFrame(animate);
+      const r = rotRef.current;
+      if (!r.down) {
+        r.velX *= 0.91; r.velY *= 0.91;
+        r.y += r.velX; r.x += r.velY;
+        r.x = Math.max(-1.15, Math.min(1.15, r.x));
+        if (threeRef.current.autoRotate) r.y += 0.007;
+      }
+      const g = threeRef.current.meshGroup;
+      if (g) { g.rotation.y = r.y; g.rotation.x = r.x; }
+      renderer.render(scene, camera);
+    };
+    animate();
+    threeRef.current.animate = animate;
+
+    return () => {
+      cancelAnimationFrame(raf);
+      dom.removeEventListener('mousedown', onDown);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      renderer.dispose();
+      if (el.contains(dom)) el.removeChild(dom);
+    };
+  }, []);
+
+  // Update texture
+  useEffect(() => {
+    if (!imageUrl) return;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const tex = threeRef.current.tex;
+      if (!tex) return;
+      tex.image = img;
+      tex.needsUpdate = true;
+      // Propagate to all mesh materials in group
+      const applyTex = (obj) => {
+        if (obj.material) {
+          const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+          mats.forEach(m => { if (m && 'map' in m) { m.map = tex; m.needsUpdate = true; } });
+        }
+        obj.children?.forEach(applyTex);
+      };
+      if (threeRef.current.meshGroup) applyTex(threeRef.current.meshGroup);
+    };
+    img.src = imageUrl;
+  }, [imageUrl]);
+
+  // Rebuild when shape changes
+  useEffect(() => {
+    if (!threeRef.current.buildMesh) return;
+    threeRef.current.buildMesh(shape);
+    // Re-apply texture
+    if (imageUrl) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const tex = threeRef.current.tex;
+        if (!tex) return;
+        tex.image = img; tex.needsUpdate = true;
+        const apply = (obj) => {
+          if (obj.material) { const ms = Array.isArray(obj.material) ? obj.material : [obj.material]; ms.forEach(m => { if (m && 'map' in m) { m.map = tex; m.needsUpdate = true; } }); }
+          obj.children?.forEach(apply);
+        };
+        if (threeRef.current.meshGroup) apply(threeRef.current.meshGroup);
+      };
+      img.src = imageUrl;
+    }
+  }, [shape]);
+
+  // Auto rotate toggle
+  useEffect(() => { threeRef.current.autoRotate = autoRotate; }, [autoRotate]);
+
+  // Lighting presets
+  useEffect(() => {
+    const { ambient, keyLight, fillLight, rimLight } = threeRef.current;
+    if (!ambient) return;
+    const T = window.THREE;
+    const presets = {
+      studio: { a:[0xffffff,.5], k:[0xffffff,1.3], f:[0x8899ff,.3], r:[0xffffff,.35] },
+      warm:   { a:[0xfff3d0,.6], k:[0xffcc88,1.5], f:[0xff8833,.2], r:[0xffddaa,.25] },
+      cool:   { a:[0xd0e8ff,.55], k:[0xaaccff,1.1], f:[0x4488ff,.35], r:[0xbbddff,.35] },
+    };
+    const p = presets[envLight];
+    ambient.color.setHex(p.a[0]); ambient.intensity = p.a[1];
+    keyLight.color.setHex(p.k[0]); keyLight.intensity = p.k[1];
+    fillLight.color.setHex(p.f[0]); fillLight.intensity = p.f[1];
+    rimLight.color.setHex(p.r[0]); rimLight.intensity = p.r[1];
+  }, [envLight]);
+
+  // Panel drag
+  const onHeaderMouseDown = (e) => {
+    if (e.target.closest('.preview3d-dot')) return;
+    e.preventDefault();
+    const startX = e.clientX - pos.left;
+    const startY = e.clientY - pos.top;
+    const onMove = (ev) => {
+      const parent = panelRef.current?.parentElement?.getBoundingClientRect();
+      if (!parent) return;
+      setPos({
+        left: Math.max(0, Math.min(parent.width - PW - 4, ev.clientX - startX)),
+        top: Math.max(0, Math.min(parent.height - 290, ev.clientY - startY)),
+      });
+    };
+    const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+
+  const SHAPES = [
+    { id:'flat', label:'Flat' },
+    { id:'folded', label:'Folded' },
+    { id:'cylinder', label:'Roll' },
+    { id:'book', label:'Book' },
+  ];
+  const LIGHTS = ['studio','warm','cool'];
+
+  return (
+    <div ref={panelRef} className="preview3d-panel" style={{ left: pos.left, top: pos.top }}>
+      <div className="preview3d-header" onMouseDown={onHeaderMouseDown}>
+        <div className="preview3d-dots">
+          <div className="preview3d-dot" style={{background:'#ff5f57',cursor:'pointer'}} onClick={onClose} title="Close preview"/>
+          <div className="preview3d-dot" style={{background:'#febc2e'}}/>
+          <div className="preview3d-dot" style={{background:'#28c840'}}/>
+        </div>
+        <span className="preview3d-title">✦ 3D Preview</span>
+        <span className="preview3d-badge">⠿ drag to move</span>
+      </div>
+
+      <div className="preview3d-body" style={{height: PH, position:'relative', cursor:'grab', background:'#111114'}}>
+        <div ref={mountRef} style={{width:'100%', height:'100%'}}/>
+        {!imageUrl && (
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none'}}>
+            <span style={{fontSize:11,color:'rgba(255,255,255,.2)',fontFamily:'Space Mono,monospace'}}>add objects to preview</span>
+          </div>
+        )}
+      </div>
+
+      {/* Shape selector */}
+      <div className="preview3d-controls">
+        {SHAPES.map(s => (
+          <button key={s.id} className={`preview3d-ctrl-btn ${shape===s.id?'active':''}`} onClick={()=>setShape(s.id)}>{s.label}</button>
+        ))}
+        <div className="preview3d-spacer"/>
+        <button className={`preview3d-ctrl-btn ${autoRotate?'active':''}`} onClick={()=>setAutoRotate(v=>!v)}
+          style={{minWidth:52}}>{autoRotate?'⏸':'▶'} Auto</button>
+      </div>
+
+      {/* Lighting */}
+      <div className="preview3d-controls" style={{paddingTop:4,paddingBottom:6}}>
+        <span style={{fontSize:9,color:'var(--text3)',letterSpacing:'.06em',textTransform:'uppercase',marginRight:4}}>Light</span>
+        {LIGHTS.map(l => (
+          <button key={l} className={`preview3d-ctrl-btn ${envLight===l?'active':''}`}
+            style={{textTransform:'capitalize'}} onClick={()=>setEnvLight(l)}>{l}</button>
+        ))}
+        <div className="preview3d-spacer"/>
+        <span style={{fontSize:9,color:'var(--text3)'}}>drag to orbit</span>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
