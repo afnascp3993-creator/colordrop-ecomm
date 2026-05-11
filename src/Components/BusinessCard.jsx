@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { businessCards } from '../data/businessCardData';
+import { businessCards } from '../data/tempData';
 import './BusinessCard.css';
 
 

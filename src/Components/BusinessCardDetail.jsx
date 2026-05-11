@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from 'react';
 import { useParams, Link } from "react-router-dom";
-import { businessCards } from '../data/businessCardData';
+import { businessCards } from '../data/tempData';
 import { useCart } from '../../Context/CartContext';
 import './BusinessCardDetail.css';
 
