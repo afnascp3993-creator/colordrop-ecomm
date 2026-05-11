@@ -47,7 +47,7 @@ function MarketingTools() {
       </div>
 
       {/* Pagination */}
-      <ServiceHighlights/>
+   
      
     </div>
   );
