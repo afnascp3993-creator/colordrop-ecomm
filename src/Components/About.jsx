@@ -1,134 +1,129 @@
 import React from 'react';
-import './About.css';
+import './About.css'; // Reusing the same CSS to maintain exact UI
+import { Link } from 'react-router-dom';
+import machineBanner from '../assets/machine-banner.png';
+import vistingCardMockup from '../assets/vistingcardd-mockup.png';
+import mugMockup from '../assets/mug-mockup.png';
 
 function About() {
   return (
-    <div className="about-container">
+    <div className="landing-page">
       {/* HERO SECTION */}
-      <section className="about-hero">
-        <div className="about-section-title" style={{ justifyContent: 'center' }}>Hero Section</div>
-        <h1>We Are More Than Printers. We Are Your Brand’s Growth Partner.</h1>
-        <p>
-          At <strong>Colordrop</strong>, we don’t just print designs — we bring ideas to life, elevate brands, and create experiences that leave a lasting impression.
-        </p>
-        <p>
-          From startups to established businesses, we help you stand out in a crowded world with powerful visuals and precision printing.
-        </p>
-      </section>
-
-      {/* OUR STORY */}
-      <section className="about-story">
-        <div>
-          <div className="about-section-title">Our Story</div>
+      <section className="landing-hero">
+        <div className="landing-hero-content">
+          <h1>
+            Explore the<br />
+            5th color experience<br />
+            with our printing<br />
+            service
+          </h1>
+          <Link to="/products" className="btn-black">START PRINTING</Link>
         </div>
-        <div className="story-text">
-          <p>
-            Every brand has a beginning. Ours started in <strong>2016</strong>, in Kannur, with a simple vision — <strong>to deliver print quality that people had never experienced before.</strong>
-          </p>
-          <p>
-            What began with one advanced digital printing machine soon turned into something bigger.
-          </p>
-          <p>
-            As businesses evolved, so did their needs. And we realized one thing: printing alone is not enough — brands need identity, strategy, and consistency.
-          </p>
-          <div className="highlight-quote">
-            So we expanded.
-          </div>
-          <p>
-            From a <strong>printing company</strong>, Colordrop grew into a <strong>complete creative and branding partner</strong> — offering design, brand identity, web solutions, and marketing support.
-          </p>
-          <p>
-            Today, we stand as a trusted name for businesses that want to look better, communicate better, and grow faster.
-          </p>
-        </div>
-      </section>
-
-      {/* WHAT WE DO */}
-      <section className="about-services">
-        <div className="services-wrapper">
-          <div className="about-section-title">What We Do</div>
-          <p style={{ fontSize: '18px', color: '#555' }}>We bring everything your brand needs under one roof:</p>
-          
-          <div className="services-grid">
-            <div className="service-card">
-              <h3>Printing</h3>
-              <p>High-quality digital printing powered by advanced technology — delivering sharp, vibrant, and premium results up to 470 GSM and beyond.</p>
-            </div>
-            <div className="service-card">
-              <h3>Design</h3>
-              <p>Creative designs that don’t just look good — they communicate, connect, and convert.</p>
-            </div>
-            <div className="service-card">
-              <h3>Branding</h3>
-              <p>We build identities that make your business memorable, consistent, and professional.</p>
-            </div>
-            <div className="service-card">
-              <h3>Digital</h3>
-              <p>From websites to marketing creatives, we help your brand thrive in the digital space.</p>
-            </div>
+        <div className="landing-hero-image">
+          <div className="illustration-placeholder" style={{ maxWidth: '650px', width: '100%', display: 'flex', justifyContent: 'flex-end', marginRight: '-5%' }}>
+            <img src={machineBanner} alt="Printing Service" style={{ width: '120%', height: 'auto', objectFit: 'contain' }} />
           </div>
         </div>
       </section>
 
-      {/* OUR PHILOSOPHY */}
-      <section className="about-philosophy">
-        <div className="philosophy-wrapper">
-          <div className="about-section-title">Our Philosophy</div>
-          <p style={{ fontSize: '18px', color: '#bbb' }}>At Colordrop, everything we do is guided by a few core beliefs:</p>
-          
-          <div className="philosophy-list">
-            <div className="philosophy-item">
-              <h3>Quality is not an option — it’s our standard.</h3>
-              <p>Every print, every design, every detail matters.</p>
+     
+
+      {/* SPLIT SECTION 1 */}
+      <section className="landing-split">
+        <div className="split-text">
+          <h2>we offer<br />amazing<br />quality print<br />at unbeatable<br />low prices</h2>
+          <p>From business cards, letterheads and compliment<br />slips to flyers, posters and roller banners.</p>
+        </div>
+        <div className="split-image">
+          <div className="color-box blue-box"></div>
+          <img src={vistingCardMockup} alt="Business Cards" className="floating-img" />
+        </div>
+      </section>
+
+      {/* SPLIT SECTION 2 */}
+      <section className="landing-split reverse">
+        <div className="split-text">
+          <h2>we offer<br />amazing<br />quality print<br />at unbeatable<br />low prices</h2>
+          <p>From business cards, letterheads and compliment<br />slips to flyers, posters and roller banners.</p>
+        </div>
+                <div className="split-image">
+          <div className="color-box yellow-box"></div>
+          <img src={mugMockup} alt="Mug Printing" className="floating-img mug-img" />
+        </div>
+      </section>
+
+      {/* PRODUCTS SECTION */}
+      <section className="landing-products">
+        <h2 className="section-title">Our Products</h2>
+        <div className="products-grid">
+
+          <div className="prod-col">
+            <div className="prod-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18M15 3v18" /></svg>
             </div>
-            <div className="philosophy-item">
-              <h3>Innovation keeps us ahead.</h3>
-              <p>We constantly upgrade our technology and ideas to deliver better results.</p>
-            </div>
-            <div className="philosophy-item">
-              <h3>Your growth is our success.</h3>
-              <p>We don’t see clients as transactions — we build long-term partnerships.</p>
-            </div>
+            <h3>Most Effective<br />Marketing Tools</h3>
+            <ul>
+              <li>Printing</li>
+              <li>Business cards</li>
+              <li>Compliment slips</li>
+              <li>Flyers</li>
+              <li>Folded flyers</li>
+              <li>Greeting cards</li>
+              <li>Letterheads</li>
+              <li>Postcards</li>
+              <li>Posters</li>
+              <li>Roller banners</li>
+              <li>Stickers</li>
+            </ul>
           </div>
+
+          <div className="prod-col">
+            <div className="prod-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>
+            </div>
+            <h3>Office & Business<br />Essentials</h3>
+            <ul>
+              <li>Printing</li>
+              <li>Business cards</li>
+              <li>Compliment slips</li>
+              <li>Flyers</li>
+              <li>Folded flyers</li>
+              <li>Greeting cards</li>
+              <li>Letterheads</li>
+              <li>Postcards</li>
+              <li>Posters</li>
+              <li>Roller banners</li>
+              <li>Stickers</li>
+            </ul>
+          </div>
+
+          <div className="prod-col">
+            <div className="prod-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" /></svg>
+            </div>
+            <h3>Promotional<br />Printing</h3>
+            <ul>
+              <li>Printing</li>
+              <li>Business cards</li>
+              <li>Compliment slips</li>
+              <li>Flyers</li>
+              <li>Folded flyers</li>
+              <li>Greeting cards</li>
+              <li>Letterheads</li>
+              <li>Postcards</li>
+              <li>Posters</li>
+              <li>Roller banners</li>
+              <li>Stickers</li>
+            </ul>
+          </div>
+
+        </div>
+        <div className="prod-action">
+          <Link to="/products" className="btn-black">START PRINTING</Link>
         </div>
       </section>
 
-      {/* WHY CHOOSE & IMPACT */}
-      <section className="about-split-section">
-        <div className="why-choose">
-          <div className="about-section-title">Why Choose Colordrop</div>
-          <ul className="choose-list">
-            <li>Advanced printing technology with unmatched quality</li>
-            <li>A complete solution — from concept to final output</li>
-            <li>Fast, reliable, and consistent delivery</li>
-            <li>Creative thinking backed by real-world experience</li>
-            <li>Trusted by businesses, designers, and institutions</li>
-          </ul>
-        </div>
-        
-        <div className="impact-content">
-          <div className="about-section-title">Our Impact</div>
-          <p>
-            Over the years, we’ve worked with <strong>business owners, agencies, designers, schools, and retail brands</strong> — helping them transform their ideas into reality.
-          </p>
-          <p>
-            From small projects to large-scale production, our focus has always remained the same: <br />
-            <strong>deliver excellence, build trust, and grow together.</strong>
-          </p>
-        </div>
-      </section>
 
-      {/* VISION & CLOSING */}
-      <section className="about-vision-closing">
-        <div className="about-section-title" style={{ justifyContent: 'center', color: '#fff' }}>Our Vision</div>
-        <p>
-          We aim to become a <strong>leading creative and printing partner across India and beyond</strong> — helping brands not just exist, but truly stand out.
-        </p>
-        
-        <div className="closing-statement">
-          <h3>Colordrop is where ideas take shape, brands find their voice, and quality meets creativity.</h3>
-        </div>
-      </section>
 
     </div>
   );

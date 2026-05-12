@@ -42,7 +42,7 @@
 
 .hero__title {
  font-weight: 600; /* or 600 for slightly lighter */
-  font-size: 40px;
+  font-size: 50px;
   line-height: 1.15;
   letter-spacing: -0.5px;
   color: #111;
@@ -98,7 +98,7 @@
 }
 
 .card__content {
-  padding-left: 20px;
+  padding-left: 30px;
   position: relative;
   z-index: 2;
   align-self: flex-start;
@@ -110,7 +110,7 @@
 .card--blue .card__title {
   font-family: 'Montserrat', sans-serif;;
   font-weight: 700;
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-size: 40px;
   line-height: 1.05;
   color: #ffffff;
   margin-bottom: 14px;
@@ -126,7 +126,7 @@
 .card--yellow .card__title {
   font-family: 'Montserrat', sans-serif;;
   font-weight: 700;
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-size: 40px;
   line-height: 1.05;
   color: #111111;
   margin-bottom: 14px;
